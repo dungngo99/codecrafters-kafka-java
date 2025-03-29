@@ -1,3 +1,7 @@
+import constants.Constant;
+import utils.FormatUtil;
+import utils.SocketUtil;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -16,7 +20,12 @@ public class Main {
             // ensures that we don't run into 'Address already in use' errors
             serverSocket.setReuseAddress(true);
             // Wait for connection from client.
-            clientSocket = serverSocket.accept();
+            while (!serverSocket.isClosed()) {
+                clientSocket = serverSocket.accept(); // wait for connection from client
+                byte[] bytes = FormatUtil.convertResponseMessageV0(Constant.ARBITRARY_MESSAGE_SIZE, Constant.ARBITRARY_CORRELATION_ID);
+                SocketUtil.writeThenFlushSocket(clientSocket, bytes);
+                SocketUtil.closeSocket(clientSocket);
+            }
         } catch (IOException e) {
             System.out.println("IOException: " + e.getMessage());
         } finally {
