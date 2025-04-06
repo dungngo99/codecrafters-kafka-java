@@ -4,4 +4,11 @@ public class Constant {
     public static final Integer ARBITRARY_MESSAGE_SIZE = 0;
     public static final Integer ARBITRARY_CORRELATION_ID = 7;
     public static final Integer INT_BYTE_SIZE = 4;
+    public static final Integer SHORT_BYTE_SIZE = 2;
+    public static final Integer MESSAGE_SIZE_BYTE_SIZE = 4;
+    public static final Integer REQUEST_API_KEY_BYTE_SIZE = 2;
+    public static final Integer REQUEST_API_VERSION_BYTE_SIZE = 2;
+    public static final Integer CORRELATION_ID_BYTE_SIZE = 4;
+    public static final String EMPTY_STRING = "";
+    public static final int[] EMPTY_ARRAY = new int[0];
 }

@@ -1,4 +1,6 @@
-import constants.Constant;
+import dto.ApiRequest;
+import dto.ApiResponse;
+import utils.ByteUtil;
 import utils.FormatUtil;
 import utils.SocketUtil;
 
@@ -22,7 +24,10 @@ public class Main {
             // Wait for connection from client.
             while (!serverSocket.isClosed()) {
                 clientSocket = serverSocket.accept(); // wait for connection from client
-                byte[] bytes = FormatUtil.convertResponseMessageV0(Constant.ARBITRARY_MESSAGE_SIZE, Constant.ARBITRARY_CORRELATION_ID);
+                ApiRequest apiRequest = ByteUtil.parseApiRequest(clientSocket);
+                ApiResponse apiResponse = ApiResponse.fromApiRequest(apiRequest);
+                // byte[] bytes = FormatUtil.convertResponseMessageV0(Constant.ARBITRARY_MESSAGE_SIZE, Constant.ARBITRARY_CORRELATION_ID);
+                byte[] bytes = FormatUtil.convertResponseMessageV2(apiResponse);
                 SocketUtil.writeThenFlushSocket(clientSocket, bytes);
                 SocketUtil.closeSocket(clientSocket);
             }
