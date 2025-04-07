@@ -3,7 +3,7 @@ package dto;
 public class ApiResponse {
     private Integer messageSize;
     private ApiResponseHeader apiResponseHeader;
-    private String body;
+    private ApiResponseBody body;
 
     public static class Builder {
         private final ApiResponse apiResponse;
@@ -11,12 +11,7 @@ public class ApiResponse {
         public Builder() {
             this.apiResponse = new ApiResponse();
             this.apiResponse.apiResponseHeader = new ApiResponseHeader();
-        }
-
-        public Builder addMessageSize(Integer messageSize) {
-            this.apiResponse.messageSize = messageSize;
-            this.apiResponse.apiResponseHeader.setMessageSize(messageSize);
-            return this;
+            this.apiResponse.body = new ApiResponseBody();
         }
 
         public Builder addCorrelationId(Integer correlationId) {
@@ -24,8 +19,13 @@ public class ApiResponse {
             return this;
         }
 
-        public Builder addApiVersion(Integer apiVersion) {
-            this.apiResponse.apiResponseHeader.setApiVersion(apiVersion);
+        public Builder addApiKey(Short apiKey) {
+            this.apiResponse.body.setApiKey(apiKey);
+            return this;
+        }
+
+        public Builder addApiVersion(Short apiVersion) {
+            this.apiResponse.body.setApiVersion(apiVersion);
             return this;
         }
 
@@ -36,9 +36,9 @@ public class ApiResponse {
 
     public static ApiResponse fromApiRequest(ApiRequest apiRequest) {
         return new ApiResponse.Builder()
-                .addMessageSize(apiRequest.getMessageSize())
                 .addCorrelationId(apiRequest.getCorrelationId())
-                .addApiVersion(apiRequest.getRequestApiVersion())
+                .addApiKey(apiRequest.getRequestApiKey().shortValue())
+                .addApiVersion(apiRequest.getRequestApiVersion().shortValue())
                 .build();
     }
 
@@ -58,11 +58,11 @@ public class ApiResponse {
         this.apiResponseHeader = apiResponseHeader;
     }
 
-    public String getBody() {
+    public ApiResponseBody getBody() {
         return body;
     }
 
-    public void setBody(String body) {
+    public void setBody(ApiResponseBody body) {
         this.body = body;
     }
 }

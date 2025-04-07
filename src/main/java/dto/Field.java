@@ -4,12 +4,10 @@ import enums.FieldType;
 
 public class Field<T extends Number> {
     private T data;
-    private Integer byteSize;
     private FieldType fieldType;
 
-    public Field(T data, Integer byteSize, FieldType fieldType) {
+    public Field(T data, FieldType fieldType) {
         this.data = data;
-        this.byteSize = byteSize;
         this.fieldType = fieldType;
     }
 
@@ -19,14 +17,6 @@ public class Field<T extends Number> {
 
     public void setData(T data) {
         this.data = data;
-    }
-
-    public Integer getByteSize() {
-        return byteSize;
-    }
-
-    public void setByteSize(Integer byteSize) {
-        this.byteSize = byteSize;
     }
 
     public FieldType getFieldType() {

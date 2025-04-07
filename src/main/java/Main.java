@@ -27,6 +27,7 @@ public class Main {
                 clientSocket = serverSocket.accept(); // wait for connection from client
                 ApiRequest apiRequest = ByteUtil.parseApiRequest(clientSocket);
                 ApiResponse apiResponse = ApiResponse.fromApiRequest(apiRequest);
+                brokerService.fillDefaultValues(apiResponse);
                 byte[] bytes = brokerService.convertResponseMessageV2(apiResponse);
                 SocketUtil.writeThenFlushSocket(clientSocket, bytes);
                 SocketUtil.closeSocket(clientSocket);
