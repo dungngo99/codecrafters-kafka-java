@@ -24,6 +24,11 @@ public class ApiResponse {
             return this;
         }
 
+        public Builder addApiVersion(Integer apiVersion) {
+            this.apiResponse.apiResponseHeader.setApiVersion(apiVersion);
+            return this;
+        }
+
         public ApiResponse build() {
             return this.apiResponse;
         }
@@ -33,6 +38,7 @@ public class ApiResponse {
         return new ApiResponse.Builder()
                 .addMessageSize(apiRequest.getMessageSize())
                 .addCorrelationId(apiRequest.getCorrelationId())
+                .addApiVersion(apiRequest.getRequestApiVersion())
                 .build();
     }
 

@@ -1,7 +1,7 @@
 import dto.ApiRequest;
 import dto.ApiResponse;
+import service.BrokerService;
 import utils.ByteUtil;
-import utils.FormatUtil;
 import utils.SocketUtil;
 
 import java.io.IOException;
@@ -18,6 +18,7 @@ public class Main {
         int port = 9092;
         try {
             serverSocket = new ServerSocket(port);
+            BrokerService brokerService = new BrokerService();
             // Since the tester restarts your program quite often, setting SO_REUSEADDR
             // ensures that we don't run into 'Address already in use' errors
             serverSocket.setReuseAddress(true);
@@ -26,8 +27,7 @@ public class Main {
                 clientSocket = serverSocket.accept(); // wait for connection from client
                 ApiRequest apiRequest = ByteUtil.parseApiRequest(clientSocket);
                 ApiResponse apiResponse = ApiResponse.fromApiRequest(apiRequest);
-                // byte[] bytes = FormatUtil.convertResponseMessageV0(Constant.ARBITRARY_MESSAGE_SIZE, Constant.ARBITRARY_CORRELATION_ID);
-                byte[] bytes = FormatUtil.convertResponseMessageV2(apiResponse);
+                byte[] bytes = brokerService.convertResponseMessageV2(apiResponse);
                 SocketUtil.writeThenFlushSocket(clientSocket, bytes);
                 SocketUtil.closeSocket(clientSocket);
             }
