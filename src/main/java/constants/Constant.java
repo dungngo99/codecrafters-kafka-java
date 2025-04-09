@@ -15,6 +15,7 @@ public class Constant {
     public static final Short API_MAX_VERSION = Short.valueOf("4");
     public static final Integer THROTTLE_TIME_MS = 0;
     public static final Byte TAGGED_FIELD_SIZE = Integer.valueOf(0).byteValue();
+    public static final Integer GRACE_PERIOD_BETWEEN_REQUEST_HANDLING = 100;
 
     /* BYTE SIZE - begin */
     public static final Integer CLIENT_ID_BYTE_SIZE = 9;

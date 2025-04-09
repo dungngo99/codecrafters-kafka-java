@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 public class ByteUtil {
     public static ApiRequest parseApiRequest(Socket socket) throws IOException {
@@ -16,12 +17,15 @@ public class ByteUtil {
         InputStream is = socket.getInputStream();
 
         byte[] messageSizeArr = is.readNBytes(FieldType.INTEGER.getByteSize());
-        byte[] requestApiKeyArr = is.readNBytes(FieldType.SHORT.getByteSize());
-        byte[] requestApiVersionArr = is.readNBytes(FieldType.SHORT.getByteSize());
-        byte[] correlationIdArr = is.readNBytes(FieldType.INTEGER.getByteSize());
-        byte[] somethingArr = is.readNBytes(FieldType.SHORT.getByteSize());
-        byte[] clientId = is.readNBytes(Constant.CLIENT_ID_BYTE_SIZE);
-        byte[] tagBufferArr = is.readNBytes(FieldType.BYTE.getByteSize());
+        int messageSize = ByteUtil.convertToIntFromByteArray(messageSizeArr);
+        byte[] buffer = is.readNBytes(messageSize);
+        int offset = 0;
+        byte[] requestApiKeyArr = Arrays.copyOfRange(buffer, offset, offset+=FieldType.SHORT.getByteSize());
+        byte[] requestApiVersionArr = Arrays.copyOfRange(buffer, offset, offset+=FieldType.SHORT.getByteSize());
+        byte[] correlationIdArr = Arrays.copyOfRange(buffer, offset, offset+=FieldType.INTEGER.getByteSize());
+        byte[] somethingArr = Arrays.copyOfRange(buffer, offset, offset+=FieldType.SHORT.getByteSize());
+        byte[] clientId = Arrays.copyOfRange(buffer, offset, offset+=Constant.CLIENT_ID_BYTE_SIZE);
+        byte[] tagBufferArr = Arrays.copyOfRange(buffer, offset, offset+FieldType.BYTE.getByteSize());
 
         ans.setMessageSize(ByteUtil.convertToIntFromByteArray(messageSizeArr));
         ans.setRequestApiKey(ByteUtil.convertToShortFromByteArray(requestApiKeyArr));

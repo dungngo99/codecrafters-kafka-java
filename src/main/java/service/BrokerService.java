@@ -1,13 +1,19 @@
 package service;
 
 import constants.Constant;
+import dto.ApiRequest;
 import dto.ApiResponse;
 import dto.ApiResponseBody;
 import dto.Field;
 import enums.FieldType;
+import utils.ByteUtil;
+import utils.SocketUtil;
 
+import java.io.IOException;
+import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.time.Duration;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -74,4 +80,24 @@ public class BrokerService {
         apiResponse.getBody().setTaggedFieldSize(Constant.TAGGED_FIELD_SIZE);
     }
 
+    public void handleClientSocket(Socket clientSocket) {
+        try {
+            while (!clientSocket.isClosed()) {
+                ApiRequest apiRequest = ByteUtil.parseApiRequest(clientSocket);
+                ApiResponse apiResponse = ApiResponse.fromApiRequest(apiRequest);
+                fillDefaultValues(apiResponse);
+                byte[] bytes = convertResponseMessageV2(apiResponse);
+                SocketUtil.writeThenFlushSocket(clientSocket, bytes);
+            }
+            Thread.sleep(Duration.ofMillis(Constant.GRACE_PERIOD_BETWEEN_REQUEST_HANDLING));
+        } catch (Exception e) {
+            System.out.println("Failed to handle client socket, error=" + e);
+        } finally {
+            try {
+                SocketUtil.closeSocket(clientSocket);
+            } catch (IOException e) {
+                System.out.println("Failed to close client socket, error=" + e);
+            }
+        }
+    }
 }

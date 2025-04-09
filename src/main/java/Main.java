@@ -25,12 +25,8 @@ public class Main {
             // Wait for connection from client.
             while (!serverSocket.isClosed()) {
                 clientSocket = serverSocket.accept(); // wait for connection from client
-                ApiRequest apiRequest = ByteUtil.parseApiRequest(clientSocket);
-                ApiResponse apiResponse = ApiResponse.fromApiRequest(apiRequest);
-                brokerService.fillDefaultValues(apiResponse);
-                byte[] bytes = brokerService.convertResponseMessageV2(apiResponse);
-                SocketUtil.writeThenFlushSocket(clientSocket, bytes);
-                SocketUtil.closeSocket(clientSocket);
+                Socket finalClientSocket = clientSocket;
+                new Thread(() -> brokerService.handleClientSocket(finalClientSocket)).start();
             }
         } catch (IOException e) {
             System.out.println("IOException: " + e.getMessage());
