@@ -2,7 +2,8 @@ package dto;
 
 public class ApiResponseBody {
     private Short apiKey;
-    private Short apiVersion;
+    private Short apiVersionKey;
+    private short describeTopicPartitionKey;
     private Short errorCode;
     private Byte apiKeyCounts;
     private Short apiMinVersion;
@@ -18,12 +19,20 @@ public class ApiResponseBody {
         this.apiKey = apiKey;
     }
 
-    public Short getApiVersion() {
-        return apiVersion;
+    public Short getApiVersionKey() {
+        return apiVersionKey;
     }
 
-    public void setApiVersion(Short apiVersion) {
-        this.apiVersion = apiVersion;
+    public void setApiVersionKey(Short apiVersionKey) {
+        this.apiVersionKey = apiVersionKey;
+    }
+
+    public short getDescribeTopicPartitionKey() {
+        return describeTopicPartitionKey;
+    }
+
+    public void setDescribeTopicPartitionKey(short describeTopicPartitionKey) {
+        this.describeTopicPartitionKey = describeTopicPartitionKey;
     }
 
     public Short getErrorCode() {

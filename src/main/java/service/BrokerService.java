@@ -49,7 +49,7 @@ public class BrokerService {
         ApiResponseBody body = apiResponse.getBody();
 
         LinkedList<Field<Number>> fieldList = new LinkedList<>();
-        boolean isValidApiVersion = Constant.SUPPORTED_API_VERSIONS.contains(body.getApiVersion());
+        boolean isValidApiVersion = Constant.SUPPORTED_API_VERSIONS.contains(body.getApiVersionKey());
         fieldList.add(new Field<>(correlationId, FieldType.INTEGER));
         if (!isValidApiVersion) {
             fieldList.add(new Field<>(Constant.UNSUPPORTED_VERSION_ERROR_CODE, FieldType.SHORT));
@@ -57,6 +57,10 @@ public class BrokerService {
             fieldList.add(new Field<>(Constant.NO_ERROR_CODE, FieldType.SHORT));
             fieldList.add(new Field<>(body.getApiKeyCounts(), FieldType.BYTE));
             fieldList.add(new Field<>(body.getApiKey(), FieldType.SHORT));
+            fieldList.add(new Field<>(body.getApiMinVersion(), FieldType.SHORT));
+            fieldList.add(new Field<>(body.getApiMaxVersion(), FieldType.SHORT));
+            fieldList.add(new Field<>(body.getTaggedFieldSize(), FieldType.BYTE));
+            fieldList.add(new Field<>(body.getDescribeTopicPartitionKey(), FieldType.SHORT));
             fieldList.add(new Field<>(body.getApiMinVersion(), FieldType.SHORT));
             fieldList.add(new Field<>(body.getApiMaxVersion(), FieldType.SHORT));
             fieldList.add(new Field<>(body.getTaggedFieldSize(), FieldType.BYTE));
@@ -78,6 +82,7 @@ public class BrokerService {
         apiResponse.getBody().setApiMaxVersion(Constant.API_MAX_VERSION);
         apiResponse.getBody().setThrottleTimeMS(Constant.THROTTLE_TIME_MS);
         apiResponse.getBody().setTaggedFieldSize(Constant.TAGGED_FIELD_SIZE);
+        apiResponse.getBody().setDescribeTopicPartitionKey(Constant.ARBITRARY_DESCRIBE_TOPIC_PARTITION_KEY);
     }
 
     public void handleClientSocket(Socket clientSocket) {

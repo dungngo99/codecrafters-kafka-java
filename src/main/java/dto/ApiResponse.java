@@ -25,7 +25,7 @@ public class ApiResponse {
         }
 
         public Builder addApiVersion(Short apiVersion) {
-            this.apiResponse.body.setApiVersion(apiVersion);
+            this.apiResponse.body.setApiVersionKey(apiVersion);
             return this;
         }
 
