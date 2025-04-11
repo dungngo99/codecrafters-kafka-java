@@ -1,0 +1,77 @@
+package utils;
+
+import dto.Field;
+import dto.Offset;
+import dto.request.RequestHeaderV2;
+import enums.ApiKey;
+import enums.FieldType;
+import service.BaseBrokerService;
+import service.BrokerService;
+
+import java.io.IOException;
+import java.net.Socket;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.util.LinkedList;
+import java.util.Objects;
+import java.util.stream.IntStream;
+
+public class BrokerUtil {
+
+    public static Field wrapField(byte[] data, Offset offset, FieldType fieldType) {
+        return wrapField(data, offset, fieldType, fieldType.getByteSize());
+    }
+
+    public static Field wrapField(byte[] data, Offset offset, FieldType fieldType, int length) {
+        byte[] fieldData = ByteUtil.copyOfRangeByOffset(data, offset, length);
+        return new Field(fieldData, fieldType, length);
+    }
+
+    public static Field wrapField(byte[] data, FieldType fieldType) {
+        return wrapField(data, fieldType, fieldType.getByteSize());
+    }
+
+    public static Field wrapField(byte[] data, FieldType fieldType, int length) {
+        return new Field(data, fieldType, length);
+    }
+
+    public static BaseBrokerService getInstance(Short key) {
+        ApiKey apiKey = ApiKey.fromKey(key);
+        if (Objects.isNull(apiKey)) {
+            throw new RuntimeException("Invalid API KEY");
+        }
+        BaseBrokerService<?, ?> handler = BrokerService.STORE.getOrDefault(apiKey, null);
+        if (Objects.isNull(handler)) {
+            throw new RuntimeException("API not registered yet");
+        }
+        return handler;
+    }
+
+    public static void handleError(Socket clientSocket, RequestHeaderV2 requestHeader) throws IOException {
+        LinkedList<Field> fieldLinkedList = new LinkedList<>();
+        fieldLinkedList.add(requestHeader.getCorrelationId());
+        fieldLinkedList.add(FieldUtil.getUnSupportedVersion());
+        handle(clientSocket, fieldLinkedList);
+    }
+
+    public static void handle(Socket clientSocket, LinkedList<Field> fieldLinkedList) throws IOException {
+        int messageSize = getMessageSizeFromFieldList(fieldLinkedList);
+        byte[] messageSizeStream = ByteUtil.convertIntToStream(messageSize);
+        fieldLinkedList.addFirst(wrapField(messageSizeStream, FieldType.INTEGER));
+        byte[] bytes = convertToStream(fieldLinkedList);
+        SocketUtil.writeThenFlushSocket(clientSocket, bytes);
+    }
+
+    private static int getMessageSizeFromFieldList(LinkedList<Field> fieldLinkedList) {
+        return fieldLinkedList.stream()
+                .flatMapToInt(e -> IntStream.builder().add(e.getSize()).build())
+                .sum();
+    }
+
+    private static byte[] convertToStream(LinkedList<Field> fieldLinkedList) {
+        int allocationSize = getMessageSizeFromFieldList(fieldLinkedList);
+        ByteBuffer byteBuffer =  ByteBuffer.allocate(allocationSize).order(ByteOrder.BIG_ENDIAN);
+        fieldLinkedList.forEach(f -> byteBuffer.put(f.getData()));
+        return byteBuffer.array();
+    }
+}

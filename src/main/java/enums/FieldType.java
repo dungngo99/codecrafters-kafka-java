@@ -3,7 +3,8 @@ package enums;
 public enum FieldType {
     INTEGER(4),
     SHORT(2),
-    BYTE(1);
+    BYTE(1),
+    STRING(-1);
 
     private final Integer byteSize;
 

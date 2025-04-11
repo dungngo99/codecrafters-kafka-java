@@ -1,108 +1,44 @@
 package service;
 
-import constants.Constant;
-import dto.ApiRequest;
-import dto.ApiResponse;
-import dto.ApiResponseBody;
 import dto.Field;
-import enums.FieldType;
-import utils.ByteUtil;
-import utils.SocketUtil;
+import dto.Offset;
+import dto.request.RequestHeaderV2;
+import dto.request.body.RequestBaseBody;
+import dto.response.body.ResponseBaseBody;
+import enums.ApiKey;
 
-import java.io.IOException;
-import java.net.Socket;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.time.Duration;
+import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.IntStream;
+import java.util.Map;
 
-public class BrokerService {
+public interface BrokerService<T extends RequestBaseBody, R extends ResponseBaseBody> {
+    Map<ApiKey, BaseBrokerService<?, ?>> STORE = new HashMap<>();
 
-    private byte[] convert(List<Field<Number>> fieldList) {
-        int allocationSize = getMessageSizeFromFieldList(fieldList);
-        ByteBuffer byteBuffer =  ByteBuffer.allocate(allocationSize).order(ByteOrder.BIG_ENDIAN);
-        fieldList.forEach(f -> convertField(f, byteBuffer));
-        return byteBuffer.array();
-    }
+    /**
+     * register a handler to local map
+     */
+    void registerHandler();
 
-    private int getMessageSizeFromFieldList(List<Field<Number>> fieldList) {
-        return fieldList.stream()
-                .flatMapToInt(e -> IntStream.builder().add(e.getFieldType().getByteSize()).build())
-                .sum();
-    }
+    /**
+     * parse the byte stream into request body obj
+     * @param bytes request byte stream
+     * @param offset current offset
+     * @return request body
+     */
+    T parseRequestBody(byte[] bytes, Offset offset);
 
-    private void convertField(Field<Number> field, ByteBuffer byteBuffer) {
-        if (Objects.equals(field.getFieldType(), FieldType.INTEGER)) {
-            byteBuffer.putInt(field.getData().intValue());
-        } else if (Objects.equals(field.getFieldType(), FieldType.SHORT)) {
-            byteBuffer.putShort(field.getData().shortValue());
-        } else if (Objects.equals(field.getFieldType(), FieldType.BYTE)) {
-            byteBuffer.put(field.getData().byteValue());
-        }
-    }
+    /**
+     * load info from request obj to response obj
+     * @param request request body
+     * @return response body
+     */
+    R convertToResponseBody(T request);
 
-    public byte[] convertResponseMessageV0(ApiResponse apiResponse) {
-        int correlationId = apiResponse.getApiResponseHeader().getCorrelationId();
-        ApiResponseBody body = apiResponse.getBody();
-
-        LinkedList<Field<Number>> fieldList = new LinkedList<>();
-        boolean isValidApiVersion = Constant.SUPPORTED_API_VERSIONS.contains(body.getApiVersionKey());
-        fieldList.add(new Field<>(correlationId, FieldType.INTEGER));
-        if (!isValidApiVersion) {
-            fieldList.add(new Field<>(Constant.UNSUPPORTED_VERSION_ERROR_CODE, FieldType.SHORT));
-        } else {
-            fieldList.add(new Field<>(Constant.NO_ERROR_CODE, FieldType.SHORT));
-            fieldList.add(new Field<>(body.getApiKeyCounts(), FieldType.BYTE));
-            fieldList.add(new Field<>(body.getApiKey(), FieldType.SHORT));
-            fieldList.add(new Field<>(body.getApiMinVersion(), FieldType.SHORT));
-            fieldList.add(new Field<>(body.getApiMaxVersion(), FieldType.SHORT));
-            fieldList.add(new Field<>(body.getTaggedFieldSize(), FieldType.BYTE));
-            fieldList.add(new Field<>(body.getDescribeTopicPartitionKey(), FieldType.SHORT));
-            fieldList.add(new Field<>(body.getApiMinVersion(), FieldType.SHORT));
-            fieldList.add(new Field<>(body.getApiMaxVersion(), FieldType.SHORT));
-            fieldList.add(new Field<>(body.getTaggedFieldSize(), FieldType.BYTE));
-            fieldList.add(new Field<>(body.getThrottleTimeMS(), FieldType.INTEGER));
-            fieldList.add(new Field<>(body.getTaggedFieldSize(), FieldType.BYTE));
-        }
-        int messageSize = getMessageSizeFromFieldList(fieldList);
-        fieldList.addFirst(new Field<>(messageSize, FieldType.INTEGER));
-        return convert(fieldList);
-    }
-
-    public byte[] convertResponseMessageV2(ApiResponse apiResponse) {
-        return convertResponseMessageV0(apiResponse);
-    }
-
-    public void fillDefaultValues(ApiResponse apiResponse) {
-        apiResponse.getBody().setApiKeyCounts(Constant.API_KEY_COUNTS);
-        apiResponse.getBody().setApiMinVersion(Constant.API_MIN_VERSION);
-        apiResponse.getBody().setApiMaxVersion(Constant.API_MAX_VERSION);
-        apiResponse.getBody().setThrottleTimeMS(Constant.THROTTLE_TIME_MS);
-        apiResponse.getBody().setTaggedFieldSize(Constant.TAGGED_FIELD_SIZE);
-        apiResponse.getBody().setDescribeTopicPartitionKey(Constant.ARBITRARY_DESCRIBE_TOPIC_PARTITION_KEY);
-    }
-
-    public void handleClientSocket(Socket clientSocket) {
-        try {
-            while (!clientSocket.isClosed()) {
-                ApiRequest apiRequest = ByteUtil.parseApiRequest(clientSocket);
-                ApiResponse apiResponse = ApiResponse.fromApiRequest(apiRequest);
-                fillDefaultValues(apiResponse);
-                byte[] bytes = convertResponseMessageV2(apiResponse);
-                SocketUtil.writeThenFlushSocket(clientSocket, bytes);
-            }
-            Thread.sleep(Duration.ofMillis(Constant.GRACE_PERIOD_BETWEEN_REQUEST_HANDLING));
-        } catch (Exception e) {
-            System.out.println("Failed to handle client socket, error=" + e);
-        } finally {
-            try {
-                SocketUtil.closeSocket(clientSocket);
-            } catch (IOException e) {
-                System.out.println("Failed to close client socket, error=" + e);
-            }
-        }
-    }
+    /**
+     * convert response obj to list of fields
+     * @param responseBody response body
+     * @param requestHeader request header V2
+     * @return list of field items
+     */
+    LinkedList<Field> convertResponse(R responseBody, RequestHeaderV2 requestHeader);
 }

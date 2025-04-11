@@ -1,8 +1,6 @@
-import dto.ApiRequest;
-import dto.ApiResponse;
-import service.BrokerService;
-import utils.ByteUtil;
-import utils.SocketUtil;
+import service.BaseBrokerService;
+import service.impl.ApiVersionsImpl;
+import service.impl.DescribeTopicPartitionsImpl;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -16,9 +14,10 @@ public class Main {
         ServerSocket serverSocket;
         Socket clientSocket = null;
         int port = 9092;
+        new DescribeTopicPartitionsImpl().registerHandler();
+        new ApiVersionsImpl().registerHandler();
         try {
             serverSocket = new ServerSocket(port);
-            BrokerService brokerService = new BrokerService();
             // Since the tester restarts your program quite often, setting SO_REUSEADDR
             // ensures that we don't run into 'Address already in use' errors
             serverSocket.setReuseAddress(true);
@@ -26,7 +25,7 @@ public class Main {
             while (!serverSocket.isClosed()) {
                 clientSocket = serverSocket.accept(); // wait for connection from client
                 Socket finalClientSocket = clientSocket;
-                new Thread(() -> brokerService.handleClientSocket(finalClientSocket)).start();
+                new Thread(() -> BaseBrokerService.handle(finalClientSocket)).start();
             }
         } catch (IOException e) {
             System.out.println("IOException: " + e.getMessage());
