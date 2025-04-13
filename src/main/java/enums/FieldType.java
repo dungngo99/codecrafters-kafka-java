@@ -1,6 +1,7 @@
 package enums;
 
 public enum FieldType {
+    BIG_INTEGER(8),
     INTEGER(4),
     SHORT(2),
     BYTE(1),

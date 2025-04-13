@@ -2,9 +2,12 @@ package dto;
 
 import enums.FieldType;
 
+import java.io.Serializable;
 import java.util.Arrays;
+import java.util.Objects;
 
-public class Field {
+public class Field implements Serializable {
+    private static final long serialVersionUID = 130740929309L;
     private byte[] data;
     private FieldType fieldType;
     private int size;
@@ -13,6 +16,13 @@ public class Field {
         this.data = data;
         this.fieldType = fieldType;
         this.size = size;
+    }
+
+    public static boolean equalsByData(Field f1, Field f2) {
+        if (Objects.isNull(f1) || Objects.isNull(f2)) {
+            return false;
+        }
+        return Arrays.equals(f1.getData(), f2.getData());
     }
 
     public byte[] getData() {

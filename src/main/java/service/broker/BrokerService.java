@@ -1,18 +1,20 @@
-package service;
+package service.broker;
 
 import dto.Field;
 import dto.Offset;
+import dto.metadata.Log;
 import dto.request.RequestHeaderV2;
-import dto.request.body.RequestBaseBody;
-import dto.response.body.ResponseBaseBody;
+import dto.request.body.BaseRequestBody;
+import dto.response.body.BaseResponseBody;
 import enums.ApiKey;
 
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
-public interface BrokerService<T extends RequestBaseBody, R extends ResponseBaseBody> {
+public interface BrokerService<T extends BaseRequestBody, R extends BaseResponseBody> {
     Map<ApiKey, BaseBrokerService<?, ?>> STORE = new HashMap<>();
+    Log CLUSTER_METADATA_LOG = new Log();
 
     /**
      * register a handler to local map
@@ -35,10 +37,10 @@ public interface BrokerService<T extends RequestBaseBody, R extends ResponseBase
     R convertToResponseBody(T request);
 
     /**
-     * convert response obj to list of fields
+     * flatten response obj to list of fields
      * @param responseBody response body
      * @param requestHeader request header V2
      * @return list of field items
      */
-    LinkedList<Field> convertResponse(R responseBody, RequestHeaderV2 requestHeader);
+    LinkedList<Field> flattenResponse(R responseBody, RequestHeaderV2 requestHeader);
 }

@@ -1,6 +1,10 @@
-import service.BaseBrokerService;
-import service.impl.ApiVersionsImpl;
-import service.impl.DescribeTopicPartitionsImpl;
+import service.broker.BaseBrokerService;
+import service.broker.impl.ApiVersionsImpl;
+import service.broker.impl.DescribeTopicPartitionsImpl;
+import service.load.impl.FeatureLevelValueImpl;
+import service.load.impl.PartitionValueImpl;
+import service.load.impl.TopicValueImpl;
+import utils.FileUtil;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -16,6 +20,11 @@ public class Main {
         int port = 9092;
         new DescribeTopicPartitionsImpl().registerHandler();
         new ApiVersionsImpl().registerHandler();
+        new FeatureLevelValueImpl().register();
+        new TopicValueImpl().register();
+        new PartitionValueImpl().register();
+        FileUtil.loadConfigs();
+        FileUtil.loadClusterMetadataLog();
         try {
             serverSocket = new ServerSocket(port);
             // Since the tester restarts your program quite often, setting SO_REUSEADDR

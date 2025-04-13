@@ -3,7 +3,9 @@ package utils;
 import dto.Offset;
 import enums.FieldType;
 
+import java.io.*;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 public class ByteUtil {
@@ -18,6 +20,10 @@ public class ByteUtil {
 
     public static int convertStreamToInt(byte[] input) {
         return getByteBuffer(input, FieldType.INTEGER.getByteSize()).getInt();
+    }
+
+    public static String convertStreamToString(byte[] input) {
+        return new String(input, StandardCharsets.UTF_8);
     }
 
     public static byte[] convertIntToStream(int input) {
@@ -46,5 +52,19 @@ public class ByteUtil {
 
     private static ByteBuffer getByteBuffer(int length) {
         return ByteBuffer.allocate(length);
+    }
+
+    public static <T extends Serializable> T deepCopy(T input) {
+        try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+             ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream)) {
+            objectOutputStream.writeObject(input);
+            ObjectInputStream objectInputStream = new ObjectInputStream(new ByteArrayInputStream(byteArrayOutputStream.toByteArray()));
+            @SuppressWarnings("unchecked")
+            T output = (T) objectInputStream.readObject();
+            return output;
+        } catch (IOException | ClassNotFoundException e) {
+            System.out.println("failed to deep copy object due to error=" + e.getMessage());
+        }
+        return null;
     }
 }

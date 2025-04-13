@@ -2,12 +2,12 @@ package utils;
 
 import dto.Field;
 import dto.Offset;
-import dto.request.RequestHeaderV2;
 import enums.ApiKey;
 import enums.FieldType;
-import service.BaseBrokerService;
-import service.BrokerService;
+import service.broker.BaseBrokerService;
+import service.broker.BrokerService;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.nio.ByteBuffer;
@@ -32,7 +32,24 @@ public class BrokerUtil {
     }
 
     public static Field wrapField(byte[] data, FieldType fieldType, int length) {
-        return new Field(data, fieldType, length);
+        return new Field(deepCopy(data), fieldType, length);
+    }
+
+    public static Field wrapField(FileInputStream fileIS, FieldType fieldType) throws IOException {
+        return wrapField(fileIS, fieldType, fieldType.getByteSize());
+    }
+
+    public static Field wrapField(FileInputStream fileIS, FieldType fieldType, int length) throws IOException {
+        return wrapField(fileIS.readNBytes(length), fieldType, length);
+    }
+
+    private static byte[] deepCopy(byte[] input) {
+        int l = input.length;
+        byte[] output = new byte[l];
+        for (int i=0; i<l; i++) {
+            output[i] = input[i];;
+        }
+        return output;
     }
 
     public static BaseBrokerService getInstance(Short key) {
@@ -45,13 +62,6 @@ public class BrokerUtil {
             throw new RuntimeException("API not registered yet");
         }
         return handler;
-    }
-
-    public static void handleError(Socket clientSocket, RequestHeaderV2 requestHeader) throws IOException {
-        LinkedList<Field> fieldLinkedList = new LinkedList<>();
-        fieldLinkedList.add(requestHeader.getCorrelationId());
-        fieldLinkedList.add(FieldUtil.getUnSupportedVersion());
-        handle(clientSocket, fieldLinkedList);
     }
 
     public static void handle(Socket clientSocket, LinkedList<Field> fieldLinkedList) throws IOException {

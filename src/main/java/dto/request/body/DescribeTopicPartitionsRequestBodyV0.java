@@ -4,7 +4,7 @@ import dto.Field;
 
 import java.util.List;
 
-public class RequestDescribeTopicPartitionsBodyV0 extends RequestBaseBody {
+public class DescribeTopicPartitionsRequestBodyV0 extends BaseRequestBody {
     public static class Item {
         private Field topicName;
         private Field topicNameLength;

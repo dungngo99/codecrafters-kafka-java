@@ -61,4 +61,29 @@ public class FieldUtil {
         byte[] errorCodeStream = ByteUtil.convertShortToStream(ErrorCode.UNSUPPORTED_VERSION.getCode().shortValue());
         return BrokerUtil.wrapField(errorCodeStream, FieldType.SHORT);
     }
+
+    public static Field getRecordId(byte[] partitionIdStream, byte[] topicIdStream) {
+        int partitionIdStreamLength = partitionIdStream.length;
+        int topicIdStreamLength = topicIdStream.length;
+        int recordIdStreamLength = partitionIdStreamLength+topicIdStreamLength;
+        byte[] recordIdStream = new byte[recordIdStreamLength];
+        System.arraycopy(partitionIdStream, 0, recordIdStream, 0, partitionIdStreamLength);
+        System.arraycopy(topicIdStream, 0, recordIdStream, partitionIdStreamLength, topicIdStreamLength);
+        return BrokerUtil.wrapField(recordIdStream, FieldType.STRING, recordIdStreamLength);
+    }
+
+    public static Field getDefaultEligibleLeaderReplicasLength() {
+        byte[] eligibleLeaderReplicasLength = ByteUtil.convertByteToStream(Constant.DEFAULT_ELIGIBLE_LEADER_REPLICAS_LENGTH);
+        return BrokerUtil.wrapField(eligibleLeaderReplicasLength, FieldType.BYTE);
+    }
+
+    public static Field getDefaultLastKnownELRLength() {
+        byte[] lastKnownELRLength = ByteUtil.convertByteToStream(Constant.DEFAULT_LAST_KNOWN_ELR_LENGTH);
+        return BrokerUtil.wrapField(lastKnownELRLength, FieldType.BYTE);
+    }
+
+    public static Field getDefaultOfflineReplicasLength() {
+        byte[] offlineReplicasLength = ByteUtil.convertByteToStream(Constant.DEFAULT_OFFLINE_REPLICAS_LENGTH);
+        return BrokerUtil.wrapField(offlineReplicasLength, FieldType.BYTE);
+    }
 }

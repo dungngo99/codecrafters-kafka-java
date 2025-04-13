@@ -1,16 +1,13 @@
-package service;
+package service.broker;
 
 import constants.Constant;
 import dto.Field;
 import dto.Offset;
 import dto.request.RequestHeaderV2;
-import dto.request.body.RequestBaseBody;
-import dto.response.body.ResponseBaseBody;
+import dto.request.body.BaseRequestBody;
+import dto.response.body.BaseResponseBody;
 import enums.FieldType;
-import utils.BrokerUtil;
-import utils.ByteUtil;
-import utils.SocketUtil;
-import utils.VersionUtil;
+import utils.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,12 +15,13 @@ import java.net.Socket;
 import java.time.Duration;
 import java.util.LinkedList;
 
-public abstract class BaseBrokerService<T extends RequestBaseBody, R extends ResponseBaseBody> implements BrokerService<T, R> {
+public abstract class BaseBrokerService<T extends BaseRequestBody, R extends BaseResponseBody> implements BrokerService<T, R> {
 
     public static void handle(Socket clientSocket) {
         try {
             while (!clientSocket.isClosed()) {
-                handle0(clientSocket);
+                LinkedList<Field> fieldLinkedList = getFieldLinkedList(clientSocket);
+                BrokerUtil.handle(clientSocket, fieldLinkedList);
             }
             Thread.sleep(Duration.ofMillis(Constant.GRACE_PERIOD_BETWEEN_REQUEST_HANDLING));
         } catch (Exception e) {
@@ -37,7 +35,7 @@ public abstract class BaseBrokerService<T extends RequestBaseBody, R extends Res
         }
     }
 
-    private static void handle0(Socket clientSocket) throws IOException {
+    private static LinkedList<Field> getFieldLinkedList(Socket clientSocket) throws IOException {
         InputStream is = clientSocket.getInputStream();
         byte[] messageSizeArr = is.readNBytes(FieldType.INTEGER.getByteSize());
         int messageSize = ByteUtil.convertStreamToInt(messageSizeArr);
@@ -62,15 +60,16 @@ public abstract class BaseBrokerService<T extends RequestBaseBody, R extends Res
 
         short apiVersionVal = ByteUtil.convertStreamToShort(requestApiVersion.getData());
         if (!VersionUtil.isValidApiVersion(apiVersionVal)) {
-            BrokerUtil.handleError(clientSocket, requestHeader);
-            return;
+            LinkedList<Field> fieldLinkedList = new LinkedList<>();
+            fieldLinkedList.add(requestHeader.getCorrelationId());
+            fieldLinkedList.add(FieldUtil.getUnSupportedVersion());
+            return fieldLinkedList;
         }
 
         short requestApiKeyVal = ByteUtil.convertStreamToShort(requestApiKey.getData());
         BaseBrokerService handler = BrokerUtil.getInstance(requestApiKeyVal);
-        RequestBaseBody requestBody = handler.parseRequestBody(data, offset);
-        ResponseBaseBody responseBody = handler.convertToResponseBody(requestBody);
-        LinkedList<Field> fieldLinkedList = handler.convertResponse(responseBody, requestHeader);
-        BrokerUtil.handle(clientSocket, fieldLinkedList);
+        BaseRequestBody requestBody = handler.parseRequestBody(data, offset);
+        BaseResponseBody responseBody = handler.convertToResponseBody(requestBody);
+        return handler.flattenResponse(responseBody, requestHeader);
     }
 }

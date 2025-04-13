@@ -4,7 +4,7 @@ import dto.Field;
 
 import java.util.List;
 
-public class ResponseApiVersionsBodyV4 extends ResponseBaseBody {
+public class ApiVersionsResponseBodyV4 extends BaseResponseBody {
     public static class Item {
         private Field apiKey;
         private Field apiMinVersion;

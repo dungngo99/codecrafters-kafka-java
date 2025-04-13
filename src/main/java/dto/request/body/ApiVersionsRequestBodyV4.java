@@ -2,7 +2,7 @@ package dto.request.body;
 
 import dto.Field;
 
-public class RequestApiVersionsBodyV4 extends RequestBaseBody {
+public class ApiVersionsRequestBodyV4 extends BaseRequestBody {
     private Field clientIdLength;
     private Field clientId;
     private Field clientSoftwareVersionLength;
