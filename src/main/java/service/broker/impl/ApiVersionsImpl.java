@@ -17,6 +17,12 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class ApiVersionsImpl extends BaseBrokerService<ApiVersionsRequestBodyV4, ApiVersionsResponseBodyV4> {
+    private static final List<ApiKey> SUPPORTED_APIS = List.of(
+            ApiKey.API_VERSIONS,
+            ApiKey.DESCRIBE_TOPIC_PARTITIONS,
+            ApiKey.FETCH
+    );
+
     @Override
     public void registerHandler() {
         STORE.put(ApiKey.API_VERSIONS, this);
@@ -44,15 +50,14 @@ public class ApiVersionsImpl extends BaseBrokerService<ApiVersionsRequestBodyV4,
     public ApiVersionsResponseBodyV4 convertToResponseBody(ApiVersionsRequestBodyV4 request) {
         ApiVersionsResponseBodyV4 responseBodyV4 = new ApiVersionsResponseBodyV4();
         responseBodyV4.setErrorCode(FieldUtil.getNone());
-        responseBodyV4.setApiKeyCounts(FieldUtil.getDefaultApiKeyCount());
+        responseBodyV4.setApiKeyCounts(FieldUtil.getApiKeyCount((byte) (SUPPORTED_APIS.size() + FieldType.BYTE.getByteSize())));
 
         List<ApiVersionsResponseBodyV4.Item> itemList = new ArrayList<>();
-        for (Short apiKey: List.of(ApiKey.API_VERSIONS.getKey(), ApiKey.DESCRIBE_TOPIC_PARTITIONS.getKey())) {
+        for (ApiKey apiKey: SUPPORTED_APIS) {
             ApiVersionsResponseBodyV4.Item item = new ApiVersionsResponseBodyV4.Item();
-            byte[] apiKeyStream = ByteUtil.convertShortToStream(apiKey);
-            item.setApiKey(BrokerUtil.wrapField(apiKeyStream, FieldType.SHORT));
-            item.setApiMinVersion(FieldUtil.getDefaultApiMinVersion());
-            item.setApiMaxVersion(FieldUtil.getDefaultApiMaxVersion());
+            item.setApiKey(BrokerUtil.wrapField(ByteUtil.convertShortToStream(apiKey.getKey()), FieldType.SHORT));
+            item.setApiMinVersion(BrokerUtil.wrapField(ByteUtil.convertShortToStream(apiKey.getMinVersion()), FieldType.SHORT));
+            item.setApiMaxVersion(BrokerUtil.wrapField(ByteUtil.convertShortToStream(apiKey.getMaxVersion()), FieldType.SHORT));
             item.setTaggedFieldSize(FieldUtil.getDefaultTaggedFieldSize());
             itemList.add(item);
         }

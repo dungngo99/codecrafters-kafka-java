@@ -41,12 +41,4 @@ public class TopicRecord extends Value implements Serializable {
         this.topicUUID = topicUUID;
     }
 
-    @Override
-    public String toString() {
-        return "TopicRecord{" +
-                "nameLength=" + nameLength +
-                ", topicName=" + topicName +
-                ", topicUUID=" + topicUUID +
-                '}';
-    }
 }

@@ -12,8 +12,8 @@ public class FieldUtil {
         return BrokerUtil.wrapField(errorCodeStream, FieldType.SHORT);
     }
 
-    public static Field getDefaultApiKeyCount() {
-        byte[] apiKeyCountStream = ByteUtil.convertByteToStream(Constant.API_KEY_COUNTS);
+    public static Field getApiKeyCount(Byte apiKeyCount) {
+        byte[] apiKeyCountStream = ByteUtil.convertByteToStream(apiKeyCount);
         return BrokerUtil.wrapField(apiKeyCountStream, FieldType.BYTE);
     }
 
