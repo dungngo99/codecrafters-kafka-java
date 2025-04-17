@@ -1,6 +1,7 @@
 import service.broker.BaseBrokerService;
 import service.broker.impl.ApiVersionsImpl;
 import service.broker.impl.DescribeTopicPartitionsImpl;
+import service.broker.impl.FetchImpl;
 import service.load.impl.FeatureLevelValueImpl;
 import service.load.impl.PartitionValueImpl;
 import service.load.impl.TopicValueImpl;
@@ -20,6 +21,7 @@ public class Main {
         int port = 9092;
         new DescribeTopicPartitionsImpl().registerHandler();
         new ApiVersionsImpl().registerHandler();
+        new FetchImpl().registerHandler();
         new FeatureLevelValueImpl().register();
         new TopicValueImpl().register();
         new PartitionValueImpl().register();

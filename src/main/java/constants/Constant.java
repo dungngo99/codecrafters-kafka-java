@@ -5,10 +5,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class Constant {
-    public static final Set<Short> SUPPORTED_API_VERSIONS = IntStream.of(0,1,2,3,4).boxed().map(Integer::shortValue).collect(Collectors.toSet());
-    public static final Byte API_KEY_COUNTS = Integer.valueOf(3).byteValue(); // note: offset=1
-    public static final Short API_MIN_VERSION = Short.valueOf("0");
-    public static final Short API_MAX_VERSION = Short.valueOf("4");
+    public static final Set<Short> SUPPORTED_API_VERSIONS = IntStream.range(0, 20).boxed().map(Integer::shortValue).collect(Collectors.toSet());
     public static final Integer THROTTLE_TIME_MS = 0;
     public static final Byte TAGGED_FIELD_SIZE = Integer.valueOf(0).byteValue();
     public static final Integer GRACE_PERIOD_BETWEEN_REQUEST_HANDLING = 100;
@@ -19,6 +16,7 @@ public class Constant {
     public static final Byte DEFAULT_ELIGIBLE_LEADER_REPLICAS_LENGTH = 1;
     public static final Byte DEFAULT_LAST_KNOWN_ELR_LENGTH = 1;
     public static final Byte DEFAULT_OFFLINE_REPLICAS_LENGTH = 1;
+    public static final Byte DEFAULT_FETCH_RESPONSE_LENGTH = 0;
     public static final Integer TOPIC_ID_LENGTH = 16;
     public static final String CONFIG_FILE_NAME = "config-default.properties";
     public static final String LOG_FILE_DEFAULT_PATH = "log.file.default.path";

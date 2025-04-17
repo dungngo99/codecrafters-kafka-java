@@ -10,5 +10,9 @@ public class Playground {
         byte[] bytes2 = {0, 0, 0, 35, 0, 75, 0, 0, 30, 102, 98, 88, 0, 12, 107, 97, 102, 107, 97, 45, 116, 101, 115, 116, 101, 114, 0, 2, 4, 102, 111, 111, 0, 0, 0, 0, 1, -1, 0};
         String hexString2 = HexFormat.of().formatHex(bytes2);
         System.out.println(hexString2);
+
+        byte[] bytes3 = {0, 0, 0, 48, 0, 1, 0, 16, 34, -128, -102, -27, 0, 12, 107, 97, 102, 107, 97, 45, 116, 101, 115, 116, 101, 114, 0, 0, 0, 1, -12, 0, 0, 0, 1, 3, 32, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0};
+        String hexString3 = HexFormat.of().formatHex(bytes3);
+        System.out.println(hexString3);
     }
 }

@@ -17,16 +17,6 @@ public class FieldUtil {
         return BrokerUtil.wrapField(apiKeyCountStream, FieldType.BYTE);
     }
 
-    public static Field getDefaultApiMinVersion() {
-        byte[] apiMinVersionStream = ByteUtil.convertShortToStream(Constant.API_MIN_VERSION);
-        return BrokerUtil.wrapField(apiMinVersionStream, FieldType.SHORT);
-    }
-
-    public static Field getDefaultApiMaxVersion() {
-        byte[] apiMaxVersionStream = ByteUtil.convertShortToStream(Constant.API_MAX_VERSION);
-        return BrokerUtil.wrapField(apiMaxVersionStream, FieldType.SHORT);
-    }
-
     public static Field getThrottleTimeMS() {
         byte[] throttleTimeMSStream = ByteUtil.convertIntToStream(Constant.THROTTLE_TIME_MS);
         return BrokerUtil.wrapField(throttleTimeMSStream, FieldType.INTEGER);
@@ -85,5 +75,10 @@ public class FieldUtil {
     public static Field getDefaultOfflineReplicasLength() {
         byte[] offlineReplicasLength = ByteUtil.convertByteToStream(Constant.DEFAULT_OFFLINE_REPLICAS_LENGTH);
         return BrokerUtil.wrapField(offlineReplicasLength, FieldType.BYTE);
+    }
+
+    public static Field getDefaultFetchResponseLength() {
+        byte[] partitionArrayLengthStream = ByteUtil.convertByteToStream(Constant.DEFAULT_FETCH_RESPONSE_LENGTH);
+        return BrokerUtil.wrapField(partitionArrayLengthStream, FieldType.BYTE);
     }
 }
