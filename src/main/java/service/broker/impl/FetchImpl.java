@@ -103,12 +103,57 @@ public class FetchImpl extends BaseBrokerService<FetchRequestBodyV16, FetchRespo
     public FetchResponseBodyV16 convertToResponseBody(FetchRequestBodyV16 request) {
         FetchResponseBodyV16 responseBodyV16 = new FetchResponseBodyV16();
         responseBodyV16.setThrottleTimeMs(FieldUtil.getThrottleTimeMS());
-        responseBodyV16.setErrorCode(FieldUtil.getNone());
+        responseBodyV16.setErrorCode(FieldUtil.getErrorCodeNone());
         responseBodyV16.setSessionId(request.getSessionId());
-        responseBodyV16.setResponseLength(FieldUtil.getDefaultFetchResponseLength());
-        responseBodyV16.setResponseList(new ArrayList<>());
+        responseBodyV16.setResponseLength(request.getTopicLength());
+        int topicLength = ByteUtil.convertStreamToByte(request.getTopicLength().getData());
+        if (topicLength > 0) {
+            List<FetchResponseBodyV16.Response> responseList = new ArrayList<>();
+            for (int i=0; i<topicLength-1; i++) {
+                FetchRequestBodyV16.TopicItem topicItem = request.getTopicItemList().get(i);
+                FetchResponseBodyV16.Response response = getFetchResponseBodyResponse(topicItem);
+                responseList.add(response);
+            }
+            responseBodyV16.setResponseList(responseList);
+        } else {
+            responseBodyV16.setResponseList(new ArrayList<>());
+        }
         responseBodyV16.setTagBuffer(FieldUtil.getDefaultTaggedFieldSize());
         return responseBodyV16;
+    }
+
+    private FetchResponseBodyV16.Response getFetchResponseBodyResponse(FetchRequestBodyV16.TopicItem topicItem) {
+        FetchResponseBodyV16.Response response = new FetchResponseBodyV16.Response();
+        response.setTopicId(topicItem.getTopicId());
+        response.setPartitionLength(FieldUtil.getDefaultFetchResponsePartitionLength());
+        int partitionLength = ByteUtil.convertStreamToByte(response.getPartitionLength().getData());
+        if (partitionLength > 0) {
+            List<FetchResponseBodyV16.PartitionItem> partitionItemList = new ArrayList<>();
+            for (int i=0; i<partitionLength-1; i++) {
+                FetchRequestBodyV16.PartitionItem requestPartitionItem = topicItem.getPartitionItemList().get(i);
+                FetchResponseBodyV16.PartitionItem responsePartitionItem = getFetchResponseBodyPartitionItem(requestPartitionItem);
+                partitionItemList.add(responsePartitionItem);
+            }
+            response.setPartitionItemList(partitionItemList);
+        } else {
+            response.setPartitionItemList(new ArrayList<>());
+        }
+        response.setTagBuffer(FieldUtil.getDefaultTaggedFieldSize());
+        return response;
+    }
+
+    private FetchResponseBodyV16.PartitionItem getFetchResponseBodyPartitionItem(FetchRequestBodyV16.PartitionItem requestPartitionItem) {
+        FetchResponseBodyV16.PartitionItem partitionItem = new FetchResponseBodyV16.PartitionItem();
+        partitionItem.setPartitionIndex(requestPartitionItem.getPartitionId());
+        partitionItem.setErrorCode(FieldUtil.getErrorCodeUnknownTopicId());
+        partitionItem.setHighWaterMark(FieldUtil.getDefaultFetchResponseHighWaterMark());
+        partitionItem.setLastStableOffset(FieldUtil.getDefaultFetchResponseLastStableOffset());
+        partitionItem.setLogStartOffset(FieldUtil.getDefaultFetchResponseLogStartOffset());
+        partitionItem.setAbortedTransactionLength(FieldUtil.getDefaultFetchResponseAbortedTransactionsLength());
+        partitionItem.setPreferredReadReplica(FieldUtil.getDefaultFetchResponsePreferredReadReplica());
+        partitionItem.setRecordLength(FieldUtil.getDefaultFetchResponseRecordLength());
+        partitionItem.setTagBuffer(FieldUtil.getDefaultTaggedFieldSize());
+        return partitionItem;
     }
 
     @Override
@@ -120,7 +165,23 @@ public class FetchImpl extends BaseBrokerService<FetchRequestBodyV16, FetchRespo
         fieldLinkedList.add(responseBody.getErrorCode());
         fieldLinkedList.add(responseBody.getSessionId());
         fieldLinkedList.add(responseBody.getResponseLength());
-        fieldLinkedList.add(FieldUtil.getDefaultTaggedFieldSize());
+        for (FetchResponseBodyV16.Response response: responseBody.getResponseList()) {
+            fieldLinkedList.add(response.getTopicId());
+            fieldLinkedList.add(response.getPartitionLength());
+            for (FetchResponseBodyV16.PartitionItem partitionItem: response.getPartitionItemList()) {
+                fieldLinkedList.add(partitionItem.getPartitionIndex());
+                fieldLinkedList.add(partitionItem.getErrorCode());
+                fieldLinkedList.add(partitionItem.getHighWaterMark());
+                fieldLinkedList.add(partitionItem.getLastStableOffset());
+                fieldLinkedList.add(partitionItem.getLogStartOffset());
+                fieldLinkedList.add(partitionItem.getAbortedTransactionLength());
+                fieldLinkedList.add(partitionItem.getPreferredReadReplica());
+                fieldLinkedList.add(partitionItem.getRecordLength());
+                fieldLinkedList.add(partitionItem.getTagBuffer());
+            }
+            fieldLinkedList.add(response.getTagBuffer());
+        }
+        fieldLinkedList.add(responseBody.getTagBuffer());
         return fieldLinkedList;
     }
 

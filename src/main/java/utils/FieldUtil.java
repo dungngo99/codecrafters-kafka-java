@@ -7,7 +7,7 @@ import enums.FieldType;
 
 public class FieldUtil {
 
-    public static Field getNone() {
+    public static Field getErrorCodeNone() {
         byte[] errorCodeStream = ByteUtil.convertShortToStream(ErrorCode.NONE.getCode().shortValue());
         return BrokerUtil.wrapField(errorCodeStream, FieldType.SHORT);
     }
@@ -27,8 +27,13 @@ public class FieldUtil {
         return BrokerUtil.wrapField(taggedFieldSizeStream, FieldType.BYTE);
     }
 
-    public static Field getDefaultUnknownTopicOrPartition() {
+    public static Field getErrorCodeUnknownTopicOrPartition() {
         byte[] errorCodeStream = ByteUtil.convertShortToStream(ErrorCode.UNKNOWN_TOPIC_OR_PARTITION.getCode().shortValue());
+        return BrokerUtil.wrapField(errorCodeStream, FieldType.SHORT);
+    }
+
+    public static Field getErrorCodeUnknownTopicId() {
+        byte[] errorCodeStream = ByteUtil.convertShortToStream(ErrorCode.UNKNOWN_TOPIC_ID.getCode().shortValue());
         return BrokerUtil.wrapField(errorCodeStream, FieldType.SHORT);
     }
 
@@ -77,8 +82,38 @@ public class FieldUtil {
         return BrokerUtil.wrapField(offlineReplicasLength, FieldType.BYTE);
     }
 
-    public static Field getDefaultFetchResponseLength() {
-        byte[] partitionArrayLengthStream = ByteUtil.convertByteToStream(Constant.DEFAULT_FETCH_RESPONSE_LENGTH);
+    public static Field getDefaultFetchResponsePartitionLength() {
+        byte[] partitionArrayLengthStream = ByteUtil.convertByteToStream(Constant.DEFAULT_FETCH_RESPONSE_PARTITION_LENGTH);
+        return BrokerUtil.wrapField(partitionArrayLengthStream, FieldType.BYTE);
+    }
+
+    public static Field getDefaultFetchResponseHighWaterMark() {
+        byte[] partitionArrayLengthStream = ByteUtil.convertLongToStream(Constant.DEFAULT_FETCH_RESPONSE_HIGH_WATERMARK);
+        return BrokerUtil.wrapField(partitionArrayLengthStream, FieldType.BIG_INTEGER);
+    }
+
+    public static Field getDefaultFetchResponseLastStableOffset() {
+        byte[] partitionArrayLengthStream = ByteUtil.convertLongToStream(Constant.DEFAULT_FETCH_RESPONSE_LAST_STABLE_OFFSET);
+        return BrokerUtil.wrapField(partitionArrayLengthStream, FieldType.BIG_INTEGER);
+    }
+
+    public static Field getDefaultFetchResponseLogStartOffset() {
+        byte[] partitionArrayLengthStream = ByteUtil.convertLongToStream(Constant.DEFAULT_FETCH_RESPONSE_LOG_START_OFFSET);
+        return BrokerUtil.wrapField(partitionArrayLengthStream, FieldType.BIG_INTEGER);
+    }
+
+    public static Field getDefaultFetchResponseAbortedTransactionsLength() {
+        byte[] partitionArrayLengthStream = ByteUtil.convertByteToStream(Constant.DEFAULT_FETCH_RESPONSE_ABORTED_TRANSACTIONS_LENGTH);
+        return BrokerUtil.wrapField(partitionArrayLengthStream, FieldType.BYTE);
+    }
+
+    public static Field getDefaultFetchResponsePreferredReadReplica() {
+        byte[] partitionArrayLengthStream = ByteUtil.convertIntToStream(Constant.DEFAULT_FETCH_RESPONSE_PREFERRED_READ_REPLICA);
+        return BrokerUtil.wrapField(partitionArrayLengthStream, FieldType.INTEGER);
+    }
+
+    public static Field getDefaultFetchResponseRecordLength() {
+        byte[] partitionArrayLengthStream = ByteUtil.convertByteToStream(Constant.DEFAULT_FETCH_RESPONSE_RECORD_LENGTH);
         return BrokerUtil.wrapField(partitionArrayLengthStream, FieldType.BYTE);
     }
 }

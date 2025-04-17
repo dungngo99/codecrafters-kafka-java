@@ -16,7 +16,13 @@ public class Constant {
     public static final Byte DEFAULT_ELIGIBLE_LEADER_REPLICAS_LENGTH = 1;
     public static final Byte DEFAULT_LAST_KNOWN_ELR_LENGTH = 1;
     public static final Byte DEFAULT_OFFLINE_REPLICAS_LENGTH = 1;
-    public static final Byte DEFAULT_FETCH_RESPONSE_LENGTH = 0;
+    public static final Byte DEFAULT_FETCH_RESPONSE_PARTITION_LENGTH = 2;
+    public static final Long DEFAULT_FETCH_RESPONSE_HIGH_WATERMARK = 0L;
+    public static final Long DEFAULT_FETCH_RESPONSE_LAST_STABLE_OFFSET = 0L;
+    public static final Long DEFAULT_FETCH_RESPONSE_LOG_START_OFFSET = 0L;
+    public static final Byte DEFAULT_FETCH_RESPONSE_ABORTED_TRANSACTIONS_LENGTH = 0;
+    public static final Integer DEFAULT_FETCH_RESPONSE_PREFERRED_READ_REPLICA = 0;
+    public static final Byte DEFAULT_FETCH_RESPONSE_RECORD_LENGTH = 0;
     public static final Integer TOPIC_ID_LENGTH = 16;
     public static final String CONFIG_FILE_NAME = "config-default.properties";
     public static final String LOG_FILE_DEFAULT_PATH = "log.file.default.path";

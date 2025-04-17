@@ -96,11 +96,11 @@ public class DescribeTopicPartitionsImpl extends BaseBrokerService<DescribeTopic
                 .filter(e -> Arrays.equals(e.getTopicName().getData(), requestItem.getTopicName().getData()))
                 .toList();
         if (topicRecords.isEmpty()) {
-            responseItem.setErrorCode(FieldUtil.getDefaultUnknownTopicOrPartition());
+            responseItem.setErrorCode(FieldUtil.getErrorCodeUnknownTopicOrPartition());
             responseItem.setTopicId(BrokerUtil.wrapField(Constant.DEFAULT_TOPIC_ID, FieldType.STRING, Constant.TOPIC_ID_LENGTH));
             responseItem.setPartitionArrayLength(FieldUtil.getDefaultPartitionArrayLength());
         } else {
-            responseItem.setErrorCode(FieldUtil.getNone());
+            responseItem.setErrorCode(FieldUtil.getErrorCodeNone());
 
             TopicRecord topicRecord = topicRecords.getFirst();
             responseItem.setTopicId(BrokerUtil.wrapField(topicRecord.getTopicUUID().getData(), FieldType.STRING, Constant.TOPIC_ID_LENGTH));
@@ -128,7 +128,7 @@ public class DescribeTopicPartitionsImpl extends BaseBrokerService<DescribeTopic
 
     private DescribeTopicPartitionsResponseBodyV0.PartitionItem getPartitionItem(PartitionRecord partitionRecord, int index) {
         DescribeTopicPartitionsResponseBodyV0.PartitionItem partitionItem = new DescribeTopicPartitionsResponseBodyV0.PartitionItem();
-        partitionItem.setErrorCode(FieldUtil.getNone());
+        partitionItem.setErrorCode(FieldUtil.getErrorCodeNone());
         partitionItem.setPartitionIndex(BrokerUtil.wrapField(ByteUtil.convertIntToStream(index), FieldType.INTEGER));
         partitionItem.setLeaderId(partitionRecord.getLeader());
         partitionItem.setLeaderEpoch(partitionRecord.getLeaderEpoch());

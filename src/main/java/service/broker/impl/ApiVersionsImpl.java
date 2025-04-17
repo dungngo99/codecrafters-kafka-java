@@ -49,7 +49,7 @@ public class ApiVersionsImpl extends BaseBrokerService<ApiVersionsRequestBodyV4,
     @Override
     public ApiVersionsResponseBodyV4 convertToResponseBody(ApiVersionsRequestBodyV4 request) {
         ApiVersionsResponseBodyV4 responseBodyV4 = new ApiVersionsResponseBodyV4();
-        responseBodyV4.setErrorCode(FieldUtil.getNone());
+        responseBodyV4.setErrorCode(FieldUtil.getErrorCodeNone());
         responseBodyV4.setApiKeyCounts(FieldUtil.getApiKeyCount((byte) (SUPPORTED_APIS.size() + FieldType.BYTE.getByteSize())));
 
         List<ApiVersionsResponseBodyV4.Item> itemList = new ArrayList<>();
