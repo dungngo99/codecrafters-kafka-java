@@ -10,6 +10,7 @@ import enums.ApiKey;
 import enums.FieldType;
 import service.broker.BaseBrokerService;
 import service.broker.BrokerService;
+import service.load.ClusterMetadataLoadService;
 import utils.BrokerUtil;
 import utils.ByteUtil;
 import utils.FieldUtil;
@@ -124,6 +125,7 @@ public class FetchImpl extends BaseBrokerService<FetchRequestBodyV16, FetchRespo
 
     private FetchResponseBodyV16.Response getFetchResponseBodyResponse(FetchRequestBodyV16.TopicItem topicItem) {
         FetchResponseBodyV16.Response response = new FetchResponseBodyV16.Response();
+        boolean isTopicExist = ClusterMetadataLoadService.TOPIC_RECORD_MAP.containsKey(topicItem.getTopicId());
         response.setTopicId(topicItem.getTopicId());
         response.setPartitionLength(FieldUtil.getDefaultFetchResponsePartitionLength());
         int partitionLength = ByteUtil.convertStreamToByte(response.getPartitionLength().getData());
@@ -131,7 +133,7 @@ public class FetchImpl extends BaseBrokerService<FetchRequestBodyV16, FetchRespo
             List<FetchResponseBodyV16.PartitionItem> partitionItemList = new ArrayList<>();
             for (int i=0; i<partitionLength-1; i++) {
                 FetchRequestBodyV16.PartitionItem requestPartitionItem = topicItem.getPartitionItemList().get(i);
-                FetchResponseBodyV16.PartitionItem responsePartitionItem = getFetchResponseBodyPartitionItem(requestPartitionItem);
+                FetchResponseBodyV16.PartitionItem responsePartitionItem = getFetchResponseBodyPartitionItem(requestPartitionItem, i, isTopicExist);
                 partitionItemList.add(responsePartitionItem);
             }
             response.setPartitionItemList(partitionItemList);
@@ -142,10 +144,14 @@ public class FetchImpl extends BaseBrokerService<FetchRequestBodyV16, FetchRespo
         return response;
     }
 
-    private FetchResponseBodyV16.PartitionItem getFetchResponseBodyPartitionItem(FetchRequestBodyV16.PartitionItem requestPartitionItem) {
+    private FetchResponseBodyV16.PartitionItem getFetchResponseBodyPartitionItem(FetchRequestBodyV16.PartitionItem requestPartitionItem, int index, boolean isTopicExist) {
         FetchResponseBodyV16.PartitionItem partitionItem = new FetchResponseBodyV16.PartitionItem();
-        partitionItem.setPartitionIndex(requestPartitionItem.getPartitionId());
-        partitionItem.setErrorCode(FieldUtil.getErrorCodeUnknownTopicId());
+        partitionItem.setPartitionIndex(BrokerUtil.wrapField(ByteUtil.convertIntToStream(index), FieldType.INTEGER));
+        if (isTopicExist) {
+            partitionItem.setErrorCode(FieldUtil.getErrorCodeNone());
+        } else {
+            partitionItem.setErrorCode(FieldUtil.getErrorCodeUnknownTopicId());
+        }
         partitionItem.setHighWaterMark(FieldUtil.getDefaultFetchResponseHighWaterMark());
         partitionItem.setLastStableOffset(FieldUtil.getDefaultFetchResponseLastStableOffset());
         partitionItem.setLogStartOffset(FieldUtil.getDefaultFetchResponseLogStartOffset());

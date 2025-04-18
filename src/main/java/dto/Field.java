@@ -50,6 +50,18 @@ public class Field implements Serializable {
     }
 
     @Override
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (!(object instanceof Field field)) return false;
+        return Arrays.equals(getData(), field.getData());
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(getData());
+    }
+
+    @Override
     public String toString() {
         return "Field{" +
                 "data=" + Arrays.toString(data) +
