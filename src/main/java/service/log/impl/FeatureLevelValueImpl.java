@@ -7,7 +7,7 @@ import service.log.LogValueService;
 import utils.BrokerUtil;
 import utils.ByteUtil;
 
-import java.io.FileInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
 public class FeatureLevelValueImpl extends LogValueService<FeatureLevelRecord> {
@@ -17,7 +17,7 @@ public class FeatureLevelValueImpl extends LogValueService<FeatureLevelRecord> {
     }
 
     @Override
-    protected void load(FileInputStream is, FeatureLevelRecord value) throws IOException {
+    protected void load(ByteArrayInputStream is, FeatureLevelRecord value) throws IOException {
         value.setNameLength(BrokerUtil.wrapField(is, FieldType.BYTE));
         int nameLength = ByteUtil.convertStreamToByte(value.getNameLength().getData()) - FieldType.BYTE.getByteSize();
         if (nameLength == -1) {

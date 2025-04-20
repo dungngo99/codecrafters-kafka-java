@@ -9,7 +9,7 @@ import service.log.LogValueService;
 import utils.BrokerUtil;
 import utils.ByteUtil;
 
-import java.io.FileInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Objects;
 
@@ -20,7 +20,7 @@ public class TopicValueImpl extends LogValueService<TopicValue> {
     }
 
     @Override
-    protected void load(FileInputStream is, TopicValue value) throws IOException {
+    protected void load(ByteArrayInputStream is, TopicValue value) throws IOException {
         value.setNameLength(BrokerUtil.wrapField(is, FieldType.BYTE));
         int nameLength = ByteUtil.convertStreamToByte(value.getNameLength().getData()) - FieldType.BYTE.getByteSize();
         value.setTopicName(BrokerUtil.wrapField(is, FieldType.STRING, nameLength));

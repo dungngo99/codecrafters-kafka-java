@@ -3,6 +3,7 @@ package dto.metadata;
 import java.util.LinkedList;
 
 public class Log {
+    private int totalByteRead;
     private LinkedList<Batch> batches;
 
     public Log() {
@@ -11,6 +12,14 @@ public class Log {
 
     public void addBatch(Batch batch) {
         batches.add(batch);
+    }
+
+    public int getTotalByteRead() {
+        return totalByteRead;
+    }
+
+    public void setTotalByteRead(int totalByteRead) {
+        this.totalByteRead = totalByteRead;
     }
 
     public LinkedList<Batch> getBatches() {

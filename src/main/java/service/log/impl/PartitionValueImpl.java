@@ -10,7 +10,7 @@ import utils.BrokerUtil;
 import utils.ByteUtil;
 import utils.FieldUtil;
 
-import java.io.FileInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.Objects;
@@ -22,7 +22,7 @@ public class PartitionValueImpl extends LogValueService<PartitionValue> {
     }
 
     @Override
-    protected void load(FileInputStream is, PartitionValue value) throws IOException {
+    protected void load(ByteArrayInputStream is, PartitionValue value) throws IOException {
         value.setPartitionId(BrokerUtil.wrapField(is, FieldType.INTEGER));
         value.setTopicUUID(BrokerUtil.wrapField(is, FieldType.STRING, Constant.TOPIC_ID_LENGTH));
         value.setReplicaArrayLength(BrokerUtil.wrapField(is, FieldType.BYTE));

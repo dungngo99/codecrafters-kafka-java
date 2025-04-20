@@ -9,6 +9,7 @@ import enums.FieldType;
 import enums.ValueType;
 import service.log.LogValueService;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -16,10 +17,6 @@ import java.util.LinkedList;
 import java.util.Objects;
 
 public class LogUtil {
-
-    public static void updateBatchRecordChecksum(Batch batch) {
-
-    }
 
     public static Log getLog(LogContext logContext) throws IOException {
         if (Objects.isNull(logContext) || Objects.isNull(logContext.getFilePath()) || logContext.getFilePath().isBlank()) {
@@ -32,17 +29,20 @@ public class LogUtil {
             return null;
         }
         FileInputStream fileIS = new FileInputStream(file);
-        logContext.setIs(fileIS);
+        byte[] allBytes = fileIS.readAllBytes();
+        ByteArrayInputStream byteArrayIS = new ByteArrayInputStream(allBytes);
+        logContext.setIs(byteArrayIS);
         Log log = new Log();
-        while (fileIS.available() != 0) {
+        while (byteArrayIS.available() != 0) {
             Batch batch = getLogBatch(logContext);
             log.addBatch(batch);
         }
+        log.setTotalByteRead(allBytes.length);
         return log;
     }
 
     private static Batch getLogBatch(LogContext logContext) throws IOException {
-        FileInputStream is = logContext.getIs();
+        ByteArrayInputStream is = logContext.getIs();
         Batch batch = new Batch();
         batch.setBaseOffset(BrokerUtil.wrapField(is, FieldType.BIG_INTEGER));
         batch.setBatchLength(BrokerUtil.wrapField(is, FieldType.INTEGER));
@@ -67,7 +67,7 @@ public class LogUtil {
     }
 
     private static Record getLogRecord(int index, LogContext logContext) throws IOException {
-        FileInputStream is = logContext.getIs();
+        ByteArrayInputStream is = logContext.getIs();
         Record record = new Record();
         if (index == 0) {
             record.setLength(BrokerUtil.wrapField(is, FieldType.BYTE));

@@ -10,7 +10,7 @@ import enums.ValueType;
 import utils.BrokerUtil;
 import utils.ByteUtil;
 
-import java.io.FileInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.*;
 
@@ -19,7 +19,7 @@ public abstract class LogValueService<T extends Value> {
     public static final Map<Field, PartitionValue> METADATA_CLUSTER_PARTITION_VALUE_MAP = new HashMap<>();
     protected static final Map<ValueType, LogValueService> STORE = new HashMap<>();
 
-    private static LinkedList<Field> fillPreCommonValues(FileInputStream is) throws IOException {
+    private static LinkedList<Field> fillPreCommonValues(ByteArrayInputStream is) throws IOException {
         LinkedList<Field> preFields = new LinkedList<>();
         preFields.add(BrokerUtil.wrapField(is, FieldType.BYTE)); // frameVersion
         preFields.add(BrokerUtil.wrapField(is, FieldType.BYTE)); // type
@@ -27,7 +27,7 @@ public abstract class LogValueService<T extends Value> {
         return preFields;
     }
 
-    private static LinkedList<Field> fillPostCommonValues(FileInputStream is) throws IOException {
+    private static LinkedList<Field> fillPostCommonValues(ByteArrayInputStream is) throws IOException {
         LinkedList<Field> postFields = new LinkedList<>();
         postFields.add(BrokerUtil.wrapField(is, FieldType.BYTE));
         return postFields;
@@ -43,7 +43,7 @@ public abstract class LogValueService<T extends Value> {
         if (Objects.isNull(logContext) || Objects.isNull(logContext.getIs())) {
             throw new RuntimeException("failed to get log value due to invalid param");
         }
-        FileInputStream is = logContext.getIs();
+        ByteArrayInputStream is = logContext.getIs();
 
         // get preFields
         LinkedList<Field> preFields = fillPreCommonValues(is);
@@ -73,7 +73,7 @@ public abstract class LogValueService<T extends Value> {
 
     protected abstract T createValue();
 
-    protected abstract void load(FileInputStream is, T value) throws IOException;
+    protected abstract void load(ByteArrayInputStream is, T value) throws IOException;
 
     protected abstract void map(T value);
 

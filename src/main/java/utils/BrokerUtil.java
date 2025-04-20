@@ -7,6 +7,7 @@ import enums.FieldType;
 import service.broker.BaseBrokerService;
 import service.broker.BrokerService;
 
+import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.Socket;
@@ -41,6 +42,14 @@ public class BrokerUtil {
 
     public static Field wrapField(FileInputStream fileIS, FieldType fieldType, int length) throws IOException {
         return wrapField(fileIS.readNBytes(length), fieldType, length);
+    }
+
+    public static Field wrapField(ByteArrayInputStream byteArrayIS, FieldType fieldType) throws IOException {
+        return wrapField(byteArrayIS, fieldType, fieldType.getByteSize());
+    }
+
+    public static Field wrapField(ByteArrayInputStream byteArrayIS, FieldType fieldType, int length) throws IOException {
+        return wrapField(byteArrayIS.readNBytes(length), fieldType, length);
     }
 
     private static byte[] deepCopy(byte[] input) {

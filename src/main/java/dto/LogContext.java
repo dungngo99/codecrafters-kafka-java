@@ -2,11 +2,11 @@ package dto;
 
 import enums.ValueType;
 
-import java.io.FileInputStream;
+import java.io.ByteArrayInputStream;
 
 public class LogContext {
     private String filePath;
-    private FileInputStream is;
+    private ByteArrayInputStream is;
     private ValueType valueType;
 
     public String getFilePath() {
@@ -17,11 +17,11 @@ public class LogContext {
         this.filePath = filePath;
     }
 
-    public FileInputStream getIs() {
+    public ByteArrayInputStream getIs() {
         return is;
     }
 
-    public void setIs(FileInputStream is) {
+    public void setIs(ByteArrayInputStream is) {
         this.is = is;
     }
 
