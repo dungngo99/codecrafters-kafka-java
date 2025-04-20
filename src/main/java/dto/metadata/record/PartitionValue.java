@@ -22,7 +22,7 @@ import java.util.LinkedList;
  * - Directories Array
  */
 
-public class PartitionRecord extends Value implements Serializable {
+public class PartitionValue extends Value implements Serializable {
     private static final long serialVersionUID = 1920980239L;
     private Field recordId;
     private Field partitionId;

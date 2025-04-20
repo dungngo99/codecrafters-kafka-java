@@ -5,7 +5,7 @@ import dto.Field;
 import java.util.LinkedList;
 
 /**
- * - Record Batch #1
+ * - CompactRecord Batch #1
  * - Base Offset
  * - Batch Length
  * - Partition Leader Epoch
@@ -19,7 +19,7 @@ import java.util.LinkedList;
  * - Producer Epoch
  * - Base Sequence
  * - Records Length
- * → Record #1
+ * → CompactRecord #1
  */
 
 public class Batch {

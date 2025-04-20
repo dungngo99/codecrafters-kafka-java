@@ -11,7 +11,7 @@ import java.io.Serializable;
  * - Topic UUID
  */
 
-public class TopicRecord extends Value implements Serializable {
+public class TopicValue extends Value implements Serializable {
     private static final long serialVersionUID = 31292730292L;
     private Field nameLength;
     private Field topicName;

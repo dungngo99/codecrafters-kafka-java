@@ -3,7 +3,7 @@ package dto.metadata;
 import dto.Field;
 
 /**
- * Record #1
+ * CompactRecord #1
  * - Length
  * - Attributes
  * - Timestamp Delta
@@ -11,7 +11,7 @@ import dto.Field;
  * - Key Length
  * - Key
  * - Value Length
- * → Value (Topic Record)
+ * → Value (Topic CompactRecord)
  * - Headers Array Count
  */
 
@@ -24,6 +24,7 @@ public class Record {
     private Field key;
     private Field valueLength;
     private Value value;
+    private Field valueStream; // raw value as byte stream
     private Field headerArrayCount;
 
     public Field getLength() {
@@ -88,6 +89,14 @@ public class Record {
 
     public void setValue(Value value) {
         this.value = value;
+    }
+
+    public Field getValueStream() {
+        return valueStream;
+    }
+
+    public void setValueStream(Field valueStream) {
+        this.valueStream = valueStream;
     }
 
     public Field getHeaderArrayCount() {

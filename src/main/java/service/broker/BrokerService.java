@@ -2,7 +2,6 @@ package service.broker;
 
 import dto.Field;
 import dto.Offset;
-import dto.metadata.Log;
 import dto.request.RequestHeaderV2;
 import dto.request.body.BaseRequestBody;
 import dto.response.body.BaseResponseBody;
@@ -14,7 +13,6 @@ import java.util.Map;
 
 public interface BrokerService<T extends BaseRequestBody, R extends BaseResponseBody> {
     Map<ApiKey, BaseBrokerService<?, ?>> STORE = new HashMap<>();
-    Log CLUSTER_METADATA_LOG = new Log();
 
     /**
      * register a handler to local map

@@ -1,7 +1,7 @@
 package dto.response.body;
 
 import dto.Field;
-import dto.Record;
+import dto.metadata.Batch;
 
 import java.util.List;
 
@@ -54,8 +54,8 @@ public class FetchResponseBodyV16 extends BaseResponseBody {
         private Field abortedTransactionLength;
         private List<AbortedTransaction> abortedTransactionList;
         private Field preferredReadReplica;
-        private Field recordLength;
-        private List<Record> recordList;
+        private Field batchRecordLength;
+        private List<Batch> batchRecordList;
         private Field tagBuffer;
 
         public Field getPartitionIndex() {
@@ -122,20 +122,20 @@ public class FetchResponseBodyV16 extends BaseResponseBody {
             this.preferredReadReplica = preferredReadReplica;
         }
 
-        public Field getRecordLength() {
-            return recordLength;
+        public Field getBatchRecordLength() {
+            return batchRecordLength;
         }
 
-        public void setRecordLength(Field recordLength) {
-            this.recordLength = recordLength;
+        public void setBatchRecordLength(Field batchRecordLength) {
+            this.batchRecordLength = batchRecordLength;
         }
 
-        public List<Record> getRecordList() {
-            return recordList;
+        public List<Batch> getBatchRecordList() {
+            return batchRecordList;
         }
 
-        public void setRecordList(List<Record> recordList) {
-            this.recordList = recordList;
+        public void setBatchRecordList(List<Batch> batchRecordList) {
+            this.batchRecordList = batchRecordList;
         }
 
         public Field getTagBuffer() {

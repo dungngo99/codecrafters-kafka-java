@@ -3,6 +3,10 @@ package service.broker.impl;
 import constants.Constant;
 import dto.Field;
 import dto.Offset;
+import dto.metadata.Batch;
+import dto.metadata.Log;
+import dto.metadata.Record;
+import dto.metadata.record.TopicValue;
 import dto.request.RequestHeaderV2;
 import dto.request.body.FetchRequestBodyV16;
 import dto.response.body.FetchResponseBodyV16;
@@ -10,14 +14,13 @@ import enums.ApiKey;
 import enums.FieldType;
 import service.broker.BaseBrokerService;
 import service.broker.BrokerService;
-import service.load.ClusterMetadataLoadService;
-import utils.BrokerUtil;
-import utils.ByteUtil;
-import utils.FieldUtil;
+import service.log.LogValueService;
+import utils.*;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
 public class FetchImpl extends BaseBrokerService<FetchRequestBodyV16, FetchResponseBodyV16> {
 
@@ -125,15 +128,14 @@ public class FetchImpl extends BaseBrokerService<FetchRequestBodyV16, FetchRespo
 
     private FetchResponseBodyV16.Response getFetchResponseBodyResponse(FetchRequestBodyV16.TopicItem topicItem) {
         FetchResponseBodyV16.Response response = new FetchResponseBodyV16.Response();
-        boolean isTopicExist = ClusterMetadataLoadService.TOPIC_RECORD_MAP.containsKey(topicItem.getTopicId());
         response.setTopicId(topicItem.getTopicId());
-        response.setPartitionLength(FieldUtil.getDefaultFetchResponsePartitionLength());
+        response.setPartitionLength(topicItem.getPartitionLength());
+        TopicValue topicValue = LogValueService.METADATA_CLUSTER_TOPIC_VALUE_MAP.get(topicItem.getTopicId());
         int partitionLength = ByteUtil.convertStreamToByte(response.getPartitionLength().getData());
         if (partitionLength > 0) {
             List<FetchResponseBodyV16.PartitionItem> partitionItemList = new ArrayList<>();
             for (int i=0; i<partitionLength-1; i++) {
-                FetchRequestBodyV16.PartitionItem requestPartitionItem = topicItem.getPartitionItemList().get(i);
-                FetchResponseBodyV16.PartitionItem responsePartitionItem = getFetchResponseBodyPartitionItem(requestPartitionItem, i, isTopicExist);
+                FetchResponseBodyV16.PartitionItem responsePartitionItem = getFetchResponseBodyPartitionItem(topicValue, i);
                 partitionItemList.add(responsePartitionItem);
             }
             response.setPartitionItemList(partitionItemList);
@@ -144,9 +146,10 @@ public class FetchImpl extends BaseBrokerService<FetchRequestBodyV16, FetchRespo
         return response;
     }
 
-    private FetchResponseBodyV16.PartitionItem getFetchResponseBodyPartitionItem(FetchRequestBodyV16.PartitionItem requestPartitionItem, int index, boolean isTopicExist) {
+    private FetchResponseBodyV16.PartitionItem getFetchResponseBodyPartitionItem(TopicValue topicValue, int index) {
         FetchResponseBodyV16.PartitionItem partitionItem = new FetchResponseBodyV16.PartitionItem();
         partitionItem.setPartitionIndex(BrokerUtil.wrapField(ByteUtil.convertIntToStream(index), FieldType.INTEGER));
+        boolean isTopicExist = Objects.nonNull(topicValue);
         if (isTopicExist) {
             partitionItem.setErrorCode(FieldUtil.getErrorCodeNone());
         } else {
@@ -157,7 +160,27 @@ public class FetchImpl extends BaseBrokerService<FetchRequestBodyV16, FetchRespo
         partitionItem.setLogStartOffset(FieldUtil.getDefaultFetchResponseLogStartOffset());
         partitionItem.setAbortedTransactionLength(FieldUtil.getDefaultFetchResponseAbortedTransactionsLength());
         partitionItem.setPreferredReadReplica(FieldUtil.getDefaultFetchResponsePreferredReadReplica());
-        partitionItem.setRecordLength(FieldUtil.getDefaultFetchResponseRecordLength());
+        if (isTopicExist) {
+            String topicName = ByteUtil.convertStreamToString(topicValue.getTopicName().getData());
+            int partitionIndex = ByteUtil.convertStreamToInt(partitionItem.getPartitionIndex().getData());
+            Log log = FileUtil.loadThenGetPartitionLog(topicName, String.valueOf(partitionIndex));
+            if (Objects.isNull(log) || log.getBatches().isEmpty()) {
+                partitionItem.setBatchRecordLength(FieldUtil.getDefaultFetchResponseRecordLength());
+                partitionItem.setBatchRecordList(new ArrayList<>());
+            } else {
+                List<Batch> batchRecordList = new ArrayList<>();
+                log.getBatches().forEach(b -> {
+                    LogUtil.updateBatchRecordChecksum(b);
+                    batchRecordList.add(b);
+                });
+                byte batchRecordLength = (byte) (batchRecordList.size() + FieldType.BYTE.getByteSize());
+                partitionItem.setBatchRecordLength(BrokerUtil.wrapField(ByteUtil.convertByteToStream(batchRecordLength), FieldType.BYTE));
+                partitionItem.setBatchRecordList(batchRecordList);
+            }
+        } else {
+            partitionItem.setBatchRecordLength(FieldUtil.getDefaultFetchResponseRecordLength());
+            partitionItem.setBatchRecordList(new ArrayList<>());
+        }
         partitionItem.setTagBuffer(FieldUtil.getDefaultTaggedFieldSize());
         return partitionItem;
     }
@@ -182,7 +205,33 @@ public class FetchImpl extends BaseBrokerService<FetchRequestBodyV16, FetchRespo
                 fieldLinkedList.add(partitionItem.getLogStartOffset());
                 fieldLinkedList.add(partitionItem.getAbortedTransactionLength());
                 fieldLinkedList.add(partitionItem.getPreferredReadReplica());
-                fieldLinkedList.add(partitionItem.getRecordLength());
+                fieldLinkedList.add(partitionItem.getBatchRecordLength());
+                for (Batch batch: partitionItem.getBatchRecordList()) {
+                    fieldLinkedList.add(batch.getBaseOffset());
+                    fieldLinkedList.add(batch.getBatchLength());
+                    fieldLinkedList.add(batch.getPartitionLeaderEpoch());
+                    fieldLinkedList.add(batch.getMagicByte());
+                    fieldLinkedList.add(batch.getCrc());
+                    fieldLinkedList.add(batch.getAttributes());
+                    fieldLinkedList.add(batch.getLastOffsetDelta());
+                    fieldLinkedList.add(batch.getBaseTimestamp());
+                    fieldLinkedList.add(batch.getMaxTimestamp());
+                    fieldLinkedList.add(batch.getProducerId());
+                    fieldLinkedList.add(batch.getProducerEpoch());
+                    fieldLinkedList.add(batch.getBaseSequence());
+                    fieldLinkedList.add(batch.getRecordLength());
+                    for (Record record: batch.getRecords()) {
+                        fieldLinkedList.add(record.getLength());
+                        fieldLinkedList.add(record.getAttributes());
+                        fieldLinkedList.add(record.getTimestampDelta());
+                        fieldLinkedList.add(record.getOffsetDelta());
+                        fieldLinkedList.add(record.getKeyLength());
+                        // fieldLinkedList.add(record.getKey());
+                        fieldLinkedList.add(record.getValueLength());
+                        fieldLinkedList.add(record.getValueStream());
+                        fieldLinkedList.add(record.getHeaderArrayCount());
+                    }
+                }
                 fieldLinkedList.add(partitionItem.getTagBuffer());
             }
             fieldLinkedList.add(response.getTagBuffer());

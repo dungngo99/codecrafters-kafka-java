@@ -1,19 +1,15 @@
 package utils;
 
 import constants.Constant;
-import dto.metadata.Batch;
-import dto.metadata.Record;
-import dto.metadata.Value;
-import enums.FieldType;
-import service.broker.BrokerService;
-import service.load.ClusterMetadataLoadService;
+import dto.LogContext;
+import dto.metadata.Log;
+import enums.ValueType;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.LinkedList;
+import java.nio.file.Path;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Properties;
 
 public class FileUtil {
@@ -32,70 +28,33 @@ public class FileUtil {
     }
 
     public static void loadClusterMetadataLog() {
-        String logFileDefaultPath = PropertyUtil.getProperty(Constant.LOG_FILE_DEFAULT_PATH);
+        String logFolderDefaultPath = PropertyUtil.getProperty(Constant.COMBINED_LOG_FOLDER_DEFAULT_PATH);
+        Path clusterMetadataDefaultPath = Path.of(logFolderDefaultPath, Constant.CLUSTER_METADATA_LOG_FOLDER_NAME, Constant.FIRST_LOG_FILE_NAME);
         try {
-            File file = new File(logFileDefaultPath);
-            if (!file.exists()) {
-                System.out.println("failed to load cluster metadata log due to file not found");
-                return;
-            }
-            FileInputStream fileIS = new FileInputStream(file);
-            while (fileIS.available() != 0) {
-                loadClusterMetadataBatches(fileIS);
+            LogContext logContext = new LogContext();
+            logContext.setFilePath(clusterMetadataDefaultPath.toString());
+            Log log = LogUtil.getLog(logContext);
+            if (Objects.nonNull(log)) {
+                System.out.println("successful to load log size = " + log.getBatches().size() + " batches for cluster metadata.");
             }
         } catch (IOException e) {
             System.out.println("failed to load cluster metadata log due to error=" + e.getMessage());
         }
     }
 
-    private static void loadClusterMetadataBatches(FileInputStream is) throws IOException {
-        Batch batch = new Batch();
-        batch.setBaseOffset(BrokerUtil.wrapField(is, FieldType.BIG_INTEGER));
-        batch.setBatchLength(BrokerUtil.wrapField(is, FieldType.INTEGER));
-        batch.setPartitionLeaderEpoch(BrokerUtil.wrapField(is, FieldType.INTEGER));
-        batch.setMagicByte(BrokerUtil.wrapField(is, FieldType.BYTE));
-        batch.setCrc(BrokerUtil.wrapField(is, FieldType.INTEGER));
-        batch.setAttributes(BrokerUtil.wrapField(is, FieldType.SHORT));
-        batch.setLastOffsetDelta(BrokerUtil.wrapField(is, FieldType.INTEGER));
-        batch.setBaseTimestamp(BrokerUtil.wrapField(is, FieldType.BIG_INTEGER));
-        batch.setMaxTimestamp(BrokerUtil.wrapField(is, FieldType.BIG_INTEGER));
-        batch.setProducerId(BrokerUtil.wrapField(is, FieldType.BIG_INTEGER));
-        batch.setProducerEpoch(BrokerUtil.wrapField(is, FieldType.SHORT));
-        batch.setBaseSequence(BrokerUtil.wrapField(is, FieldType.INTEGER));
-        batch.setRecordLength(BrokerUtil.wrapField(is, FieldType.INTEGER));
-        batch.setRecords(new LinkedList<>());
-        int numRecords = ByteUtil.convertStreamToInt(batch.getRecordLength().getData());
-        for (int i=0; i<numRecords; i++) {
-            Record record = loadClusterMetadataRecords(is, i);
-            batch.getRecords().add(record);
+    public static Log loadThenGetPartitionLog(String topicName, String partitionIndex) {
+        String logFolderDefaultPath = PropertyUtil.getProperty(Constant.COMBINED_LOG_FOLDER_DEFAULT_PATH);
+        String partitionDirectory = String.format("%s-%s", topicName, partitionIndex);
+        Path partitionLogDefaultPath = Path.of(logFolderDefaultPath, partitionDirectory, Constant.FIRST_LOG_FILE_NAME);
+        try {
+            LogContext logContext = new LogContext();
+            logContext.setFilePath(partitionLogDefaultPath.toString());
+            logContext.setValueType(ValueType.PARTITION);
+            return LogUtil.getLog(logContext);
+        } catch (IOException e) {
+            System.out.println("failed to get partition log due to error=" + e.getMessage());
+            return null;
         }
-        BrokerService.CLUSTER_METADATA_LOG.addBatch(batch);
-    }
-
-    private static Record loadClusterMetadataRecords(FileInputStream is, int index) throws IOException {
-        Record record = new Record();
-        if (index == 0) {
-            record.setLength(BrokerUtil.wrapField(is, FieldType.BYTE));
-        } else {
-            record.setLength(BrokerUtil.wrapField(is, FieldType.SHORT));
-        }
-        record.setAttributes(BrokerUtil.wrapField(is, FieldType.BYTE));
-        record.setTimestampDelta(BrokerUtil.wrapField(is, FieldType.BYTE));
-        record.setOffsetDelta(BrokerUtil.wrapField(is, FieldType.BYTE));
-        record.setKeyLength(BrokerUtil.wrapField(is, FieldType.BYTE));
-        record.setKey(null);
-        if (index == 0) {
-            record.setValueLength(BrokerUtil.wrapField(is, FieldType.BYTE));
-        } else {
-            record.setValueLength(BrokerUtil.wrapField(is, FieldType.SHORT));
-        }
-        record.setValue(getClusterMetadataValue(is));
-        record.setHeaderArrayCount(BrokerUtil.wrapField(is, FieldType.BYTE));
-        return record;
-    }
-
-    private static Value getClusterMetadataValue(FileInputStream is) throws IOException {
-        return ClusterMetadataLoadService.getClusterMetadataValue(is);
     }
 
 }

@@ -1,11 +1,11 @@
-package service.load.impl;
+package service.log.impl;
 
 import constants.Constant;
 import dto.Field;
-import dto.metadata.record.PartitionRecord;
+import dto.metadata.record.PartitionValue;
 import enums.FieldType;
-import enums.RecordType;
-import service.load.ClusterMetadataLoadService;
+import enums.ValueType;
+import service.log.LogValueService;
 import utils.BrokerUtil;
 import utils.ByteUtil;
 import utils.FieldUtil;
@@ -15,14 +15,14 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.Objects;
 
-public class PartitionValueImpl extends ClusterMetadataLoadService<PartitionRecord> {
+public class PartitionValueImpl extends LogValueService<PartitionValue> {
     @Override
-    protected PartitionRecord createValue() {
-        return new PartitionRecord();
+    protected PartitionValue createValue() {
+        return new PartitionValue();
     }
 
     @Override
-    protected void load(FileInputStream is, PartitionRecord value) throws IOException {
+    protected void load(FileInputStream is, PartitionValue value) throws IOException {
         value.setPartitionId(BrokerUtil.wrapField(is, FieldType.INTEGER));
         value.setTopicUUID(BrokerUtil.wrapField(is, FieldType.STRING, Constant.TOPIC_ID_LENGTH));
         value.setReplicaArrayLength(BrokerUtil.wrapField(is, FieldType.BYTE));
@@ -70,20 +70,20 @@ public class PartitionValueImpl extends ClusterMetadataLoadService<PartitionReco
     }
 
     @Override
-    protected void map(PartitionRecord value) {
-        PartitionRecord copiedPartitionRecord = ByteUtil.deepCopy(value);
-        if (Objects.isNull(copiedPartitionRecord)) {
+    protected void map(PartitionValue value) {
+        PartitionValue copiedPartitionValue = ByteUtil.deepCopy(value);
+        if (Objects.isNull(copiedPartitionValue)) {
             return;
         }
-        byte[] partitionIdStream = copiedPartitionRecord.getPartitionId().getData();
-        byte[] topicIdStream = copiedPartitionRecord.getTopicUUID().getData();
+        byte[] partitionIdStream = copiedPartitionValue.getPartitionId().getData();
+        byte[] topicIdStream = copiedPartitionValue.getTopicUUID().getData();
         Field recordId = FieldUtil.getRecordId(partitionIdStream, topicIdStream);
         value.setRecordId(recordId);
-        PARTITION_RECORD_MAP.put(recordId, copiedPartitionRecord);
+        METADATA_CLUSTER_PARTITION_VALUE_MAP.put(recordId, copiedPartitionValue);
     }
 
     @Override
     public void register() {
-        ClusterMetadataLoadService.STORE.put(RecordType.PARTITION, this);
+        LogValueService.STORE.put(ValueType.PARTITION, this);
     }
 }

@@ -82,11 +82,6 @@ public class FieldUtil {
         return BrokerUtil.wrapField(offlineReplicasLength, FieldType.BYTE);
     }
 
-    public static Field getDefaultFetchResponsePartitionLength() {
-        byte[] partitionArrayLengthStream = ByteUtil.convertByteToStream(Constant.DEFAULT_FETCH_RESPONSE_PARTITION_LENGTH);
-        return BrokerUtil.wrapField(partitionArrayLengthStream, FieldType.BYTE);
-    }
-
     public static Field getDefaultFetchResponseHighWaterMark() {
         byte[] partitionArrayLengthStream = ByteUtil.convertLongToStream(Constant.DEFAULT_FETCH_RESPONSE_HIGH_WATERMARK);
         return BrokerUtil.wrapField(partitionArrayLengthStream, FieldType.BIG_INTEGER);

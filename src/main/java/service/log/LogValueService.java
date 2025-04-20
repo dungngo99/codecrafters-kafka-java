@@ -1,25 +1,23 @@
-package service.load;
+package service.log;
 
 import dto.Field;
+import dto.LogContext;
 import dto.metadata.Value;
-import dto.metadata.record.PartitionRecord;
-import dto.metadata.record.TopicRecord;
+import dto.metadata.record.PartitionValue;
+import dto.metadata.record.TopicValue;
 import enums.FieldType;
-import enums.RecordType;
+import enums.ValueType;
 import utils.BrokerUtil;
 import utils.ByteUtil;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
-public abstract class ClusterMetadataLoadService<T extends Value> {
-    public static final Map<Field, TopicRecord> TOPIC_RECORD_MAP = new HashMap<>();
-    public static final Map<Field, PartitionRecord> PARTITION_RECORD_MAP = new HashMap<>();
-    protected static final Map<RecordType, ClusterMetadataLoadService> STORE = new HashMap<>();
+public abstract class LogValueService<T extends Value> {
+    public static final Map<Field, TopicValue> METADATA_CLUSTER_TOPIC_VALUE_MAP = new HashMap<>();
+    public static final Map<Field, PartitionValue> METADATA_CLUSTER_PARTITION_VALUE_MAP = new HashMap<>();
+    protected static final Map<ValueType, LogValueService> STORE = new HashMap<>();
 
     private static LinkedList<Field> fillPreCommonValues(FileInputStream is) throws IOException {
         LinkedList<Field> preFields = new LinkedList<>();
@@ -35,26 +33,39 @@ public abstract class ClusterMetadataLoadService<T extends Value> {
         return postFields;
     }
 
-    public static Value getClusterMetadataValue(FileInputStream is) throws IOException {
+    private static LogValueService getLogValueServiceHandler(Field type) {
+        byte b = ByteUtil.convertStreamToByte(type.getData());
+        ValueType valueType = ValueType.ofType(b);
+        return STORE.get(valueType);
+    }
+
+    public static Value getLogValue(LogContext logContext) throws IOException {
+        if (Objects.isNull(logContext) || Objects.isNull(logContext.getIs())) {
+            throw new RuntimeException("failed to get log value due to invalid param");
+        }
+        FileInputStream is = logContext.getIs();
+
+        // get preFields
         LinkedList<Field> preFields = fillPreCommonValues(is);
 
-        Field type = preFields.get(1);
-        byte b = ByteUtil.convertStreamToByte(type.getData());
-        RecordType recordType = RecordType.ofType(b);
-        ClusterMetadataLoadService handler = STORE.get(recordType);
+        // select valueHandler
+        LogValueService handler = getLogValueServiceHandler(preFields.get(1));
         if (Objects.isNull(handler)) {
             throw new RuntimeException("not found handler to load cluster metadata value");
         }
 
+        // fill valueFields
         Value value = handler.createValue();
         handler.load(is, value);
         handler.map(value);
 
-        LinkedList<Field> postFields = fillPostCommonValues(is);
-
+        // fill preFields
         value.setFrameVersion(preFields.get(0));
         value.setType(preFields.get(1));
         value.setVersion(preFields.get(2));
+
+        // fill postFields
+        LinkedList<Field> postFields = fillPostCommonValues(is);
         value.setTaggedFieldCount(postFields.get(0));
 
         return value;

@@ -1,16 +1,16 @@
-package service.load.impl;
+package service.log.impl;
 
 import dto.metadata.record.FeatureLevelRecord;
 import enums.FieldType;
-import enums.RecordType;
-import service.load.ClusterMetadataLoadService;
+import enums.ValueType;
+import service.log.LogValueService;
 import utils.BrokerUtil;
 import utils.ByteUtil;
 
 import java.io.FileInputStream;
 import java.io.IOException;
 
-public class FeatureLevelValueImpl extends ClusterMetadataLoadService<FeatureLevelRecord> {
+public class FeatureLevelValueImpl extends LogValueService<FeatureLevelRecord> {
     @Override
     protected FeatureLevelRecord createValue() {
         return new FeatureLevelRecord();
@@ -34,6 +34,6 @@ public class FeatureLevelValueImpl extends ClusterMetadataLoadService<FeatureLev
 
     @Override
     public void register() {
-        ClusterMetadataLoadService.STORE.put(RecordType.FEATURE_LEVEL, this);
+        LogValueService.STORE.put(ValueType.FEATURE_LEVEL, this);
     }
 }

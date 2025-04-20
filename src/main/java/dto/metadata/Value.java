@@ -3,7 +3,7 @@ package dto.metadata;
 import dto.Field;
 
 /**
- * Value (Topic Record)
+ * Value (Topic CompactRecord)
  * - Frame Version
  * - Type
  * - Version

@@ -16,7 +16,6 @@ public class Constant {
     public static final Byte DEFAULT_ELIGIBLE_LEADER_REPLICAS_LENGTH = 1;
     public static final Byte DEFAULT_LAST_KNOWN_ELR_LENGTH = 1;
     public static final Byte DEFAULT_OFFLINE_REPLICAS_LENGTH = 1;
-    public static final Byte DEFAULT_FETCH_RESPONSE_PARTITION_LENGTH = 2;
     public static final Long DEFAULT_FETCH_RESPONSE_HIGH_WATERMARK = 0L;
     public static final Long DEFAULT_FETCH_RESPONSE_LAST_STABLE_OFFSET = 0L;
     public static final Long DEFAULT_FETCH_RESPONSE_LOG_START_OFFSET = 0L;
@@ -25,5 +24,7 @@ public class Constant {
     public static final Byte DEFAULT_FETCH_RESPONSE_RECORD_LENGTH = 0;
     public static final Integer TOPIC_ID_LENGTH = 16;
     public static final String CONFIG_FILE_NAME = "config-default.properties";
-    public static final String LOG_FILE_DEFAULT_PATH = "log.file.default.path";
+    public static final String COMBINED_LOG_FOLDER_DEFAULT_PATH = "combined.log.folder.path";
+    public static final String CLUSTER_METADATA_LOG_FOLDER_NAME = "__cluster_metadata-0";
+    public static final String FIRST_LOG_FILE_NAME = "00000000000000000000.log";
 }

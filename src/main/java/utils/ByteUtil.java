@@ -22,6 +22,10 @@ public class ByteUtil {
         return getByteBuffer(input, FieldType.INTEGER.getByteSize()).getInt();
     }
 
+    public static String convertStreamToString(byte[] input) {
+        return new String(input, StandardCharsets.UTF_8);
+    }
+
     public static byte[] convertLongToStream(long input) {
         return getByteBuffer(FieldType.BIG_INTEGER.getByteSize()).putLong(input).clear().array();
     }
