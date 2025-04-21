@@ -12,7 +12,7 @@ import enums.ApiKey;
 import enums.FieldType;
 import service.broker.BaseBrokerService;
 import service.broker.BrokerService;
-import service.log.LogValueService;
+import service.log.BaseLogValueService;
 import utils.BrokerUtil;
 import utils.ByteUtil;
 import utils.FieldUtil;
@@ -92,7 +92,7 @@ public class DescribeTopicPartitionsImpl extends BaseBrokerService<DescribeTopic
         responseItem.setTopicNameLength(requestItem.getTopicNameLength());
         responseItem.setTopicName(requestItem.getTopicName());
 
-        List<TopicValue> topicValues = LogValueService.METADATA_CLUSTER_TOPIC_VALUE_MAP.values().stream()
+        List<TopicValue> topicValues = BaseLogValueService.METADATA_CLUSTER_TOPIC_VALUE_MAP.values().stream()
                 .filter(e -> Arrays.equals(e.getTopicName().getData(), requestItem.getTopicName().getData()))
                 .toList();
         if (topicValues.isEmpty()) {
@@ -105,7 +105,7 @@ public class DescribeTopicPartitionsImpl extends BaseBrokerService<DescribeTopic
             TopicValue topicValue = topicValues.getFirst();
             responseItem.setTopicId(BrokerUtil.wrapField(topicValue.getTopicUUID().getData(), FieldType.STRING, Constant.TOPIC_ID_LENGTH));
 
-            List<PartitionValue> partitionValues = LogValueService.METADATA_CLUSTER_PARTITION_VALUE_MAP.values().stream()
+            List<PartitionValue> partitionValues = BaseLogValueService.METADATA_CLUSTER_PARTITION_VALUE_MAP.values().stream()
                     .filter(e -> Arrays.equals(e.getTopicUUID().getData(), topicValue.getTopicUUID().getData()))
                     .toList();
             int partitionArrayLength = partitionValues.size();

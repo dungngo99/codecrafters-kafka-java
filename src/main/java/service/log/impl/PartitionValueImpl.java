@@ -5,7 +5,7 @@ import dto.Field;
 import dto.metadata.record.PartitionValue;
 import enums.FieldType;
 import enums.ValueType;
-import service.log.LogValueService;
+import service.log.BaseLogValueService;
 import utils.BrokerUtil;
 import utils.ByteUtil;
 import utils.FieldUtil;
@@ -15,14 +15,14 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.Objects;
 
-public class PartitionValueImpl extends LogValueService<PartitionValue> {
+public class PartitionValueImpl extends BaseLogValueService<PartitionValue> {
     @Override
-    protected PartitionValue createValue() {
+    public PartitionValue createValue() {
         return new PartitionValue();
     }
 
     @Override
-    protected void load(ByteArrayInputStream is, PartitionValue value) throws IOException {
+    public void load(ByteArrayInputStream is, PartitionValue value) throws IOException {
         value.setPartitionId(BrokerUtil.wrapField(is, FieldType.INTEGER));
         value.setTopicUUID(BrokerUtil.wrapField(is, FieldType.STRING, Constant.TOPIC_ID_LENGTH));
         value.setReplicaArrayLength(BrokerUtil.wrapField(is, FieldType.BYTE));
@@ -70,7 +70,7 @@ public class PartitionValueImpl extends LogValueService<PartitionValue> {
     }
 
     @Override
-    protected void map(PartitionValue value) {
+    public void map(PartitionValue value) {
         PartitionValue copiedPartitionValue = ByteUtil.deepCopy(value);
         if (Objects.isNull(copiedPartitionValue)) {
             return;
@@ -84,6 +84,6 @@ public class PartitionValueImpl extends LogValueService<PartitionValue> {
 
     @Override
     public void register() {
-        LogValueService.STORE.put(ValueType.PARTITION, this);
+        BaseLogValueService.STORE.put(ValueType.PARTITION, this);
     }
 }

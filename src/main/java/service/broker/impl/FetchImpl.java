@@ -14,7 +14,7 @@ import enums.ApiKey;
 import enums.FieldType;
 import service.broker.BaseBrokerService;
 import service.broker.BrokerService;
-import service.log.LogValueService;
+import service.log.BaseLogValueService;
 import utils.*;
 
 import java.util.ArrayList;
@@ -130,7 +130,7 @@ public class FetchImpl extends BaseBrokerService<FetchRequestBodyV16, FetchRespo
         FetchResponseBodyV16.Response response = new FetchResponseBodyV16.Response();
         response.setTopicId(topicItem.getTopicId());
         response.setPartitionLength(topicItem.getPartitionLength());
-        TopicValue topicValue = LogValueService.METADATA_CLUSTER_TOPIC_VALUE_MAP.get(topicItem.getTopicId());
+        TopicValue topicValue = BaseLogValueService.METADATA_CLUSTER_TOPIC_VALUE_MAP.get(topicItem.getTopicId());
         int partitionLength = ByteUtil.convertStreamToByte(response.getPartitionLength().getData());
         if (partitionLength > 0) {
             List<FetchResponseBodyV16.PartitionItem> partitionItemList = new ArrayList<>();

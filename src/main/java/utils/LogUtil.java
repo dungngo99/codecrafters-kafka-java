@@ -7,7 +7,7 @@ import dto.metadata.Record;
 import dto.metadata.Value;
 import enums.FieldType;
 import enums.ValueType;
-import service.log.LogValueService;
+import service.log.BaseLogValueService;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -101,6 +101,6 @@ public class LogUtil {
     }
 
     private static Value getLogValue(LogContext logContext) throws IOException {
-        return LogValueService.getLogValue(logContext);
+        return BaseLogValueService.getLogValue(logContext);
     }
 }

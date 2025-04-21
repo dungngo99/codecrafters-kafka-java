@@ -5,7 +5,7 @@ import dto.Field;
 import dto.metadata.record.TopicValue;
 import enums.FieldType;
 import enums.ValueType;
-import service.log.LogValueService;
+import service.log.BaseLogValueService;
 import utils.BrokerUtil;
 import utils.ByteUtil;
 
@@ -13,14 +13,14 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Objects;
 
-public class TopicValueImpl extends LogValueService<TopicValue> {
+public class TopicValueImpl extends BaseLogValueService<TopicValue> {
     @Override
-    protected TopicValue createValue() {
+    public TopicValue createValue() {
         return new TopicValue();
     }
 
     @Override
-    protected void load(ByteArrayInputStream is, TopicValue value) throws IOException {
+    public void load(ByteArrayInputStream is, TopicValue value) throws IOException {
         value.setNameLength(BrokerUtil.wrapField(is, FieldType.BYTE));
         int nameLength = ByteUtil.convertStreamToByte(value.getNameLength().getData()) - FieldType.BYTE.getByteSize();
         value.setTopicName(BrokerUtil.wrapField(is, FieldType.STRING, nameLength));
@@ -28,7 +28,7 @@ public class TopicValueImpl extends LogValueService<TopicValue> {
     }
 
     @Override
-    protected void map(TopicValue value) {
+    public void map(TopicValue value) {
         TopicValue copiedTopicValue = ByteUtil.deepCopy(value);
         if (Objects.isNull(copiedTopicValue)) {
             return;
@@ -40,6 +40,6 @@ public class TopicValueImpl extends LogValueService<TopicValue> {
 
     @Override
     public void register() {
-        LogValueService.STORE.put(ValueType.TOPIC, this);
+        BaseLogValueService.STORE.put(ValueType.TOPIC, this);
     }
 }

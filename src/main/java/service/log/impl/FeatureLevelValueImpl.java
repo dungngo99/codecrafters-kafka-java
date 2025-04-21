@@ -3,21 +3,21 @@ package service.log.impl;
 import dto.metadata.record.FeatureLevelRecord;
 import enums.FieldType;
 import enums.ValueType;
-import service.log.LogValueService;
+import service.log.BaseLogValueService;
 import utils.BrokerUtil;
 import utils.ByteUtil;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
-public class FeatureLevelValueImpl extends LogValueService<FeatureLevelRecord> {
+public class FeatureLevelValueImpl extends BaseLogValueService<FeatureLevelRecord> {
     @Override
-    protected FeatureLevelRecord createValue() {
+    public FeatureLevelRecord createValue() {
         return new FeatureLevelRecord();
     }
 
     @Override
-    protected void load(ByteArrayInputStream is, FeatureLevelRecord value) throws IOException {
+    public void load(ByteArrayInputStream is, FeatureLevelRecord value) throws IOException {
         value.setNameLength(BrokerUtil.wrapField(is, FieldType.BYTE));
         int nameLength = ByteUtil.convertStreamToByte(value.getNameLength().getData()) - FieldType.BYTE.getByteSize();
         if (nameLength == -1) {
@@ -29,11 +29,11 @@ public class FeatureLevelValueImpl extends LogValueService<FeatureLevelRecord> {
     }
 
     @Override
-    protected void map(FeatureLevelRecord value) {
+    public void map(FeatureLevelRecord value) {
     }
 
     @Override
     public void register() {
-        LogValueService.STORE.put(ValueType.FEATURE_LEVEL, this);
+        BaseLogValueService.STORE.put(ValueType.FEATURE_LEVEL, this);
     }
 }
